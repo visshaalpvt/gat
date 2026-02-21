@@ -403,12 +403,28 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, rgba(30, 58, 138, 0.2), rgba(5, 6, 8, 0.9));
+            background: transparent;
             z-index: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1.5rem;
+        }
+
+        .vignette-outer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.8) 100%);
+        }
+
+        .vignette-center {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
         }
     </style>
 </head>
@@ -424,6 +440,8 @@
     </div>
 
     <canvas id="glitchCanvas"></canvas>
+    <div class="vignette-outer"></div>
+    <div class="vignette-center"></div>
 
     <div id="loginPage" class="login-overlay" style="display:flex;">
         <div
@@ -762,24 +780,36 @@
         };
         probeBackends();
 
-        // --- LETTER GLITCH COMPONENT (VANILLA JS PORT) ---
+        // --- PREMIUM LETTER GLITCH ENGINE (FALLING RAIN + SMOOTH V3) ---
+        // --- PREMIUM PROVOST GRADE DIGITAL RAIN ENGINE ---
         class LetterGlitch {
             constructor(canvasId) {
                 this.canvas = document.getElementById(canvasId);
                 if (!this.canvas) return;
                 this.ctx = this.canvas.getContext('2d');
                 this.colors = ['#2b4539', '#61dca3', '#61b3dc', '#00e5ff', '#ff0055'];
-                this.chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789'.split('');
+                this.glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789'.split('');
+
                 this.fontSize = 16;
                 this.charW = 12;
                 this.charH = 22;
+                this.glitchSpeed = 60;
+
                 this.grid = { cols: 0, rows: 0 };
-                this.letters = [];
+                this.cells = [];
+                this.columnsOffset = []; // For the rain effect
                 this.lastUpdate = Date.now();
+
                 window.addEventListener('resize', () => this.init());
                 this.init();
                 this.animate();
             }
+
+            hexToRgb(hex) {
+                const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return res ? { r: parseInt(res[1], 16), g: parseInt(res[2], 16), b: parseInt(res[3], 16) } : { r: 0, g: 0, b: 0 };
+            }
+
             init() {
                 const rect = this.canvas.parentElement.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
@@ -788,39 +818,71 @@
                 this.canvas.style.width = rect.width + 'px';
                 this.canvas.style.height = rect.height + 'px';
                 this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
                 this.grid.cols = Math.ceil(rect.width / this.charW);
                 this.grid.rows = Math.ceil(rect.height / this.charH);
-                this.letters = Array.from({ length: this.grid.cols * this.grid.rows }, () => ({
-                    char: this.chars[Math.floor(Math.random() * this.chars.length)],
-                    color: this.colors[Math.floor(Math.random() * this.colors.length)],
-                    opacity: 0.1 + Math.random() * 0.4
-                }));
+
+                this.columnsOffset = Array.from({ length: this.grid.cols }, () => Math.random() * this.charH);
+                this.cells = Array.from({ length: this.grid.cols * this.grid.rows }, () => {
+                    const c = this.colors[Math.floor(Math.random() * this.colors.length)];
+                    const rgb = this.hexToRgb(c);
+                    return {
+                        char: this.glyphs[Math.floor(Math.random() * this.glyphs.length)],
+                        rgb: { ...rgb },
+                        targetRgb: { ...rgb },
+                        opacity: 0.1 + Math.random() * 0.4
+                    };
+                });
             }
-            animate() {
+
+            update() {
                 const now = Date.now();
-                if (now - this.lastUpdate > 60) {
-                    const count = Math.floor(this.letters.length * 0.05);
+                if (now - this.lastUpdate > this.glitchSpeed) {
+                    const count = Math.max(1, Math.floor(this.cells.length * 0.05));
                     for (let i = 0; i < count; i++) {
-                        const idx = Math.floor(Math.random() * this.letters.length);
-                        this.letters[idx].char = this.chars[Math.floor(Math.random() * this.chars.length)];
-                        this.letters[idx].opacity = 0.1 + Math.random() * 0.4;
+                        const idx = Math.floor(Math.random() * this.cells.length);
+                        const cell = this.cells[idx];
+                        cell.char = this.glyphs[Math.floor(Math.random() * this.glyphs.length)];
+                        cell.targetRgb = this.hexToRgb(this.colors[Math.floor(Math.random() * this.colors.length)]);
                     }
-                    this.draw();
                     this.lastUpdate = now;
                 }
-                requestAnimationFrame(() => this.animate());
-            }
-            draw() {
-                this.ctx.clearRect(0, 0, this.canvas.width / window.devicePixelRatio, this.canvas.height / window.devicePixelRatio);
-                this.ctx.font = `${this.fontSize}px monospace`;
-                this.ctx.textBaseline = 'top';
-                this.letters.forEach((l, i) => {
-                    const x = (i % this.grid.cols) * this.charW;
-                    const y = Math.floor(i / this.grid.cols) * this.charH;
-                    this.ctx.fillStyle = l.color;
-                    this.ctx.globalAlpha = l.opacity;
-                    this.ctx.fillText(l.char, x, y);
+
+                this.cells.forEach(c => {
+                    c.rgb.r += (c.targetRgb.r - c.rgb.r) * 0.1;
+                    c.rgb.g += (c.targetRgb.g - c.rgb.g) * 0.1;
+                    c.rgb.b += (c.targetRgb.b - c.rgb.b) * 0.1;
                 });
+
+                // Advance Column Offsets (RAIN)
+                for (let i = 0; i < this.columnsOffset.length; i++) {
+                    this.columnsOffset[i] += 0.8; // Falling speed
+                    if (this.columnsOffset[i] > this.charH) this.columnsOffset[i] = 0;
+                }
+            }
+
+            draw() {
+                const dpr = window.devicePixelRatio || 1;
+                this.ctx.clearRect(0, 0, this.canvas.width / dpr, this.canvas.height / dpr);
+                this.ctx.font = `${this.fontSize}px 'JetBrains Mono', monospace`;
+                this.ctx.textBaseline = 'top';
+
+                this.cells.forEach((c, idx) => {
+                    const col = idx % this.grid.cols;
+                    const row = Math.floor(idx / this.grid.cols);
+                    const x = col * this.charW;
+                    const y = (row * this.charH) + this.columnsOffset[col];
+
+                    this.ctx.fillStyle = `rgb(${Math.round(c.rgb.r)},${Math.round(c.rgb.g)},${Math.round(c.rgb.b)})`;
+                    this.ctx.globalAlpha = c.opacity;
+                    this.ctx.fillText(c.char, x, y);
+                });
+            }
+
+            animate() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.animate());
             }
         }
 
