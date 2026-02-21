@@ -100,6 +100,33 @@ def init_db():
             )
             db.add(new_user)
     
+    # Seed initial bank records if empty
+    if db.query(BankRecord).count() == 0:
+        from app.crypto import encrypt, generate_prefixes
+        sample_records = [
+            ("CUST001", "Enterprise Admin", "100020003000", "555-0101", "CIPH001", "Main Branch", "London", "50000"),
+            ("CUST002", "Security Analyst", "400050006000", "555-0202", "CIPH002", "Cyber Dept", "New York", "75000"),
+            ("CUST003", "Bank Officer", "700080009000", "555-0303", "CIPH003", "Vault Ops", "Singapore", "120000")
+        ]
+        for cid, name, acc, ph, ifsc, br, city, bal in sample_records:
+            rec = BankRecord(
+                customer_id=encrypt(cid),
+                full_name=encrypt(name),
+                account_number=encrypt(acc),
+                phone_number=encrypt(ph),
+                ifsc_code=encrypt(ifsc),
+                branch=encrypt(br),
+                city=encrypt(city),
+                balance=encrypt(bal),
+                risk_score=encrypt("Low")
+            )
+            db.add(rec)
+            db.flush()
+            # Add searchable tokens
+            for field, val in [("name", name), ("phone", ph), ("account", acc), ("ifsc", ifsc), ("city", city)]:
+                for t in generate_prefixes(val):
+                    db.add(SearchToken(token=t, field=field, record_id=rec.id))
+    
     db.commit()
     db.close()
 
