@@ -179,38 +179,58 @@ async def anomaly_report(db: Session = Depends(get_db),
 
     now = datetime.utcnow()
     timeline = []
-    for i in range(10):
-        t = now - timedelta(minutes=9 - i)
+    # Get search counts for the last 12 minutes for a smooth graph
+    for i in range(12):
+        t_end = now - timedelta(minutes=i)
+        t_start = t_end - timedelta(minutes=1)
         c = db.query(AuditLog).filter(
             AuditLog.action == "SEARCH",
-            AuditLog.timestamp >= t - timedelta(minutes=1),
-            AuditLog.timestamp < t
+            AuditLog.timestamp >= t_start,
+            AuditLog.timestamp < t_end
         ).count()
-        timeline.append({"label": t.strftime("%H:%M"), "count": c})
+        timeline.append({"label": t_end.strftime("%H:%M"), "count": c})
+    timeline.reverse()
 
     return {
         "users": [{"user": a.user, "searches": a.search_count,
                     "score": a.risk_score, "last": str(a.last_action_time)[:19]}
                    for a in activities],
         "alerts": alerts,
-        "timeline": timeline
+        "timeline": timeline,
+        "risk_dist": [
+            db.query(UserActivity).filter(UserActivity.risk_score < 30).count(),
+            db.query(UserActivity).filter(UserActivity.risk_score >= 30, UserActivity.risk_score < 70).count(),
+            db.query(UserActivity).filter(UserActivity.risk_score >= 70).count()
+        ]
     }
 
 
 # ===== PERFORMANCE METRICS =====
+@app.get("/performace-metrics") # Matching common misspelling in some frontend hits
 @app.get("/performance-metrics")
 async def perf_metrics(db: Session = Depends(get_db),
                        current_user: User = Depends(get_current_user)):
+    # 1. Encryption Benchmark
     t0 = time.time()
     for _ in range(50):
-        encrypt("bench")
+        encrypt("bench_string_123456789")
     enc_time = round((time.time() - t0) / 50 * 1000, 3)
 
+    # 2. Token Generation Benchmark
+    t0 = time.time()
+    for _ in range(50):
+        generate_search_token("bench_query")
+    tok_time = round((time.time() - t0) / 50 * 1000, 3)
+
+    total_rec = db.query(BankRecord).count()
+    
     return {
         "enc_speed_ms": enc_time,
-        "total_records": db.query(BankRecord).count(),
-        "total_tokens": db.query(SearchToken).count(),
+        "tok_speed_ms": tok_time,
+        "total_records": total_rec,
+        "throughput": round(1000 / max(enc_time + tok_time, 0.001), 1)
     }
+
 
 
 # ===== OPTIMIZED CSV UPLOAD (BATCHING) =====
