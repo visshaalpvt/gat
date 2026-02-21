@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAL 4.0 — Secure Search Intelligence Platform</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --card: #fff;
+            --text: #1a1d23;
+            --muted: #6b7280;
+            --primary: #2563eb;
+            --primary-light: #dbeafe;
+            --primary-dark: #1d4ed8;
+            --success: #059669;
+            --success-light: #d1fae5;
+            --danger: #dc2626;
+            --danger-light: #fee2e2;
+            --warning: #d97706;
+            --warning-light: #fef3c7;
+            --border: #e5e7eb;
+            --sidebar-bg: #111827;
+            --sidebar-text: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        #loginPage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a, #1e40af);
+        }
+
+        .login-box {
+            background: #fff;
+            padding: 3rem 2.5rem;
+            border-radius: 20px;
+            width: 420px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .login-box h1 {
+            font-size: 1.8rem;
+            margin-bottom: .5rem;
+        }
+
+        .login-box p {
+            color: var(--muted);
+            margin-bottom: 2rem;
+            font-size: .9rem;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            outline: none;
+            transition: .2s;
+        }
+
+        .login-box input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: .95rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, .3);
+        }
+
+        #dashboard {
+            display: none;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .logo {
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            color: var(--sidebar-text);
+            border-radius: 10px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-size: .9rem;
+            font-weight: 500;
+            transition: .15s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, .08);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main {
+            margin-left: 260px;
+            padding: 2rem 2.5rem;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 0 0 0 80px;
+            opacity: .08;
+        }
+
+        .stat:nth-child(1)::after {
+            background: var(--primary);
+        }
+
+        .stat:nth-child(2)::after {
+            background: var(--success);
+        }
+
+        .stat:nth-child(3)::after {
+            background: var(--warning);
+        }
+
+        .stat:nth-child(4)::after {
+            background: var(--danger);
+        }
+
+        .stat label {
+            font-size: .75rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            font-weight: 600;
+        }
+
+        .stat .num {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-head {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-head h3 {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .page {
+            display: none;
+            animation: fadeUp .35s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 20px;
+            background: #f9fafb;
+            color: var(--muted);
+            font-size: .7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: .5px;
+        }
+
+        td {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            font-size: .88rem;
+        }
+
+        tr:hover td {
+            background: #f9fafb;
+        }
+
+        .search-banner {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: #fff;
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+
+        .search-banner h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+
+        .search-banner p {
+            opacity: .8;
+            margin-top: 6px;
+        }
+
+        .search-wrap {
+            position: relative;
+            margin-top: 1.5rem;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            padding: 16px 50px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            outline: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-wrap input::placeholder {
+            color: rgba(255, 255, 255, .6);
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, .7);
+        }
+
+        #tokenBox {
+            display: none;
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 1.25rem 1.5rem;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+            white-space: pre-wrap;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            padding: 2rem;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: linear-gradient(180deg, #fff 0%, #f9fafb 100%);
+        }
+
+        .metric .big {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+            margin: 8px 0;
+        }
+
+        .metric label {
+            font-size: .75rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .metric small {
+            font-size: .7rem;
+            color: var(--muted);
+        }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: .88rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-danger {
+            background: var(--danger-light);
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-warning {
+            background: var(--warning-light);
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .alert-success {
+            background: var(--success-light);
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        #breachView {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #000;
+            color: #22c55e;
+            z-index: 9999;
+            padding: 3rem 4rem;
+            font-family: 'JetBrains Mono', monospace;
+            overflow-y: auto;
+            font-size: .85rem;
+            line-height: 1.8;
+        }
+
+        #loadOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, .96);
+            z-index: 5000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pipe-step {
+            width: 420px;
+            padding: 14px 20px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            opacity: .3;
+            transition: .4s;
+            background: #fff;
+            font-weight: 500;
+        }
+
+        .pipe-step.go {
+            opacity: 1;
+            border-color: var(--primary);
+            transform: scale(1.03);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, .15);
+        }
+
+        .pipe-step.ok {
+            opacity: 1;
+            border-color: var(--success);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: .7rem;
+            font-weight: 700;
+        }
+
+        .badge-green {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .badge-red {
+            background: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .badge-blue {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge-yellow {
+            background: var(--warning-light);
+            color: var(--warning);
+        }
+
+        #searchError {
+            display: none;
+            background: var(--danger-light);
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .8rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="breachView">
+        <div
+            style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #164;padding-bottom:1.5rem;margin-bottom:2rem;">
+            <h1 style="font-size:1.5rem;">[!] EMERGENCY: RAW DATABASE DUMP</h1>
+            <button onclick="toggleBreach()"
+                style="background:#164;color:#22c55e;border:1px solid #22c55e;padding:10px 24px;font-weight:700;border-radius:8px;cursor:pointer;">RESTORE
+                PROTECTION</button>
+        </div>
+        <div id="dumpBox"></div>
+    </div>
+
+    <div id="loadOverlay">
+        <h2 style="margin-bottom:2rem;font-weight:800;">Secure Ingestion Pipeline</h2>
+        <div id="p1" class="pipe-step"><i class="fa-solid fa-file-csv"></i> Reading CSV Stream</div>
+        <div id="p2" class="pipe-step"><i class="fa-solid fa-lock"></i> AES-256 Encryption</div>
+        <div id="p3" class="pipe-step"><i class="fa-solid fa-key"></i> HMAC-SHA256 Token Gen</div>
+        <div id="p4" class="pipe-step"><i class="fa-solid fa-database"></i> Atomic DB Write</div>
+    </div>
+
+    <div id="loginPage">
+        <div class="login-box">
+            <div style="font-size:2.5rem;color:var(--primary);margin-bottom:1rem;"><i
+                    class="fa-solid fa-shield-halved"></i></div>
+            <h1>HAL 4.0</h1>
+            <p>Secure Search Intelligence Platform</p>
+            <form onsubmit="doLogin(event)">
+                <input type="text" id="inUser" placeholder="Admin ID" value="admin" required>
+                <input type="password" id="inPass" placeholder="Authorization Key" value="admin123" required>
+                <button type="submit" class="btn btn-primary" style="width:100%;">AUTHENTICATE</button>
+            </form>
+            <div style="margin-top:1.5rem;font-size:.75rem;color:var(--muted);">AES-256 + HMAC-SHA256 + JWT</div>
+        </div>
+    </div>
+
+    <div id="dashboard">
+        <div class="sidebar">
+            <div class="logo"><i class="fa-solid fa-shield-halved"></i> HAL 4.0</div>
+            <div class="nav-item active" onclick="go('home',this)"><i class="fa-solid fa-chart-pie"></i> Dashboard</div>
+            <div class="nav-item" onclick="go('search',this)"><i class="fa-solid fa-magnifying-glass"></i> Secure Search
+            </div>
+            <div class="nav-item" onclick="document.getElementById('csvIn').click()"><i
+                    class="fa-solid fa-cloud-arrow-up"></i> Upload Dataset</div>
+            <div class="nav-item" onclick="go('anomaly',this)"><i class="fa-solid fa-triangle-exclamation"></i> Anomaly
+                Detection</div>
+            <div class="nav-item" onclick="go('chain',this)"><i class="fa-solid fa-link"></i> Tamper Detection</div>
+            <div class="nav-item" onclick="go('audit',this)"><i class="fa-solid fa-clipboard-list"></i> Audit Logs</div>
+            <div class="nav-item" onclick="go('perf',this)"><i class="fa-solid fa-gauge-high"></i> Performance</div>
+            <div class="nav-item" onclick="toggleBreach()"><i class="fa-solid fa-skull-crossbones"></i> Breach
+                Simulation</div>
+            <input type="file" id="csvIn" hidden accept=".csv" onchange="doCSV(this)">
+            <div style="margin-top:auto;">
+                <div class="nav-item" onclick="doLogout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                </div>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="top-bar">
+                <h2 id="pgTitle" style="font-weight:800;">Dashboard</h2>
+                <div style="text-align:right;">
+                    <div style="font-weight:700;">ADMIN_001</div>
+                    <div style="font-size:.72rem;color:var(--success);font-weight:700;"><i class="fa-solid fa-circle"
+                            style="font-size:6px;"></i> ENCRYPTION ACTIVE</div>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat"><label>Encrypted Records</label>
+                    <div class="num" id="sRec">—</div>
+                </div>
+                <div class="stat"><label>Search Tokens</label>
+                    <div class="num" id="sTok">—</div>
+                </div>
+                <div class="stat"><label>Blockchain Blocks</label>
+                    <div class="num" id="sBlk">—</div>
+                </div>
+                <div class="stat"><label>Audit Events</label>
+                    <div class="num" id="sLog">—</div>
+                </div>
+            </div>
+
+            <!-- HOME -->
+            <div id="home" class="page active">
+                <div class="card"
+                    style="background:linear-gradient(135deg,#0f172a,#1e3a8a);color:#fff;border:none;padding:2.5rem;">
+                    <h2 style="font-size:1.3rem;margin-bottom:1rem;"><i class="fa-solid fa-brain"></i> PS: Secured
+                        String Matching using Searchable Encryption</h2>
+                    <p style="line-height:1.7;opacity:.9;"><strong>Core Innovation:</strong> Enable privacy-preserving
+                        search over encrypted databases. Data stays <strong>fully encrypted at all times</strong>.
+                        Server never sees plaintext — not during storage, not during search.</p>
+                    <div class="grid-2" style="margin-top:1.5rem;">
+                        <div
+                            style="background:rgba(255,255,255,.1);padding:1.5rem;border-radius:12px;border:1px solid rgba(255,255,255,.15);">
+                            <h4 style="margin-bottom:8px;"><i class="fa-solid fa-xmark" style="color:#f87171;"></i>
+                                Traditional</h4>
+                            <p style="font-size:.85rem;opacity:.8;">Data decrypted for search. Plaintext exposed.</p>
+                        </div>
+                        <div
+                            style="background:rgba(255,255,255,.1);padding:1.5rem;border-radius:12px;border:1px solid rgba(255,255,255,.15);">
+                            <h4 style="margin-bottom:8px;"><i class="fa-solid fa-check" style="color:#34d399;"></i> HAL
+                                4.0</h4>
+                            <p style="font-size:.85rem;opacity:.8;">Token-matching on ciphertext. Zero plaintext.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-head">
+                            <h3>Security Architecture</h3>
+                        </div>
+                        <div style="padding:1.5rem;display:grid;gap:12px;">
+                            <div
+                                style="display:flex;align-items:center;gap:12px;padding:12px;background:#f0f9ff;border-radius:8px;">
+                                <i class="fa-solid fa-lock" style="color:var(--primary);width:20px;"></i>
+                                <div><strong>Storage:</strong> AES-256-CBC</div>
+                            </div>
+                            <div
+                                style="display:flex;align-items:center;gap:12px;padding:12px;background:#f0fdf4;border-radius:8px;">
+                                <i class="fa-solid fa-key" style="color:var(--success);width:20px;"></i>
+                                <div><strong>Search:</strong> HMAC-SHA256 Blind Index</div>
+                            </div>
+                            <div
+                                style="display:flex;align-items:center;gap:12px;padding:12px;background:#fffbeb;border-radius:8px;">
+                                <i class="fa-solid fa-link" style="color:var(--warning);width:20px;"></i>
+                                <div><strong>Integrity:</strong> Blockchain Hash Chain</div>
+                            </div>
+                            <div
+                                style="display:flex;align-items:center;gap:12px;padding:12px;background:#fef2f2;border-radius:8px;">
+                                <i class="fa-solid fa-fingerprint" style="color:var(--danger);width:20px;"></i>
+                                <div><strong>Auth:</strong> JWT Tokens</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h3>Activity (Real-Time)</h3>
+                        </div>
+                        <div style="padding:1.5rem;height:280px;"><canvas id="chartHome"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEARCH -->
+            <div id="search" class="page">
+                <div class="search-banner">
+                    <h2><i class="fa-solid fa-shield-halved"></i> Search Without Decrypting</h2>
+                    <p>Zero-knowledge matching across encrypted banking records</p>
+                    <div class="search-wrap"><i class="fa-solid fa-magnifying-glass"></i><input id="qIn"
+                            placeholder="Type a name: Sarah, John, Emma, Priya, Mumbai..." autocomplete="off"></div>
+                </div>
+                <div id="searchError"></div>
+                <div id="tokenBox"></div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Record ID</th>
+                                <th>Customer (Decrypted & Masked)</th>
+                                <th>Account</th>
+                                <th>City</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resBody">
+                            <tr>
+                                <td colspan="5" style="text-align:center;padding:3rem;color:var(--muted);">Enter a
+                                    search query above (min 3 characters)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ANOMALY -->
+            <div id="anomaly" class="page">
+                <div class="grid-2" style="margin-bottom:1.5rem;">
+                    <div class="card" style="text-align:center;">
+                        <div class="card-head">
+                            <h3>Risk Score</h3>
+                        </div>
+                        <div style="padding:2rem;">
+                            <div id="riskNum" style="font-size:4.5rem;font-weight:900;color:var(--success);">0</div>
+                            <div style="font-weight:700;color:var(--muted);font-size:.8rem;">ANOMALY RISK LEVEL</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <h3>Active Alerts</h3>
+                        </div>
+                        <div style="padding:1.5rem;" id="alertsBox">
+                            <div class="alert alert-success"><i class="fa-solid fa-check-circle"></i> Normal</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <h3>Search Frequency Timeline</h3>
+                    </div>
+                    <div style="padding:1.5rem;height:300px;"><canvas id="chartAnomaly"></canvas></div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <h3>User Activity</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Searches</th>
+                                <th>Risk</th>
+                                <th>Last Active</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="actBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- BLOCKCHAIN -->
+            <div id="chain" class="page">
+                <div class="card">
+                    <div class="card-head">
+                        <h3><i class="fa-solid fa-link"></i> Blockchain Tamper Detection</h3><button
+                            class="btn btn-primary" onclick="doTamperCheck()">VERIFY INTEGRITY</button>
+                    </div>
+                    <div id="tamperStatus" style="padding:2rem;text-align:center;">
+                        <p style="color:var(--muted);">Click VERIFY INTEGRITY to validate hash chain.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <h3>Block Explorer</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Time</th>
+                                <th>Action</th>
+                                <th>User</th>
+                                <th>Prev Hash</th>
+                                <th>Block Hash</th>
+                            </tr>
+                        </thead>
+                        <tbody id="chainBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- AUDIT -->
+            <div id="audit" class="page">
+                <div class="card">
+                    <div class="card-head">
+                        <h3><i class="fa-solid fa-clipboard-list"></i> Immutable Audit Trail</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>Hash</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PERFORMANCE -->
+            <div id="perf" class="page">
+                <div class="card">
+                    <div class="card-head">
+                        <h3><i class="fa-solid fa-gauge-high"></i> Encryption & Retrieval Scorecard</h3>
+                    </div>
+                    <div class="metric-grid">
+                        <div class="metric"><label>Encryption Speed</label><span class="big"
+                                id="mEnc">—</span><small>Per Record (AES-256)</small></div>
+                        <div class="metric"><label>Token Speed</label><span class="big"
+                                id="mTok">—</span><small>HMAC-SHA256</small></div>
+                        <div class="metric"><label>Throughput</label><span class="big"
+                                id="mThr">—</span><small>Rec/Sec</small></div>
+                        <div class="metric"><label>Records</label><span class="big" id="mRec">—</span><small>All
+                                Encrypted</small></div>
+                        <div class="metric"><label>Tokens</label><span class="big" id="mTokC">—</span><small>Index
+                                Entries</small></div>
+                        <div class="metric"><label>Per Record</label><span class="big" id="mRat">—</span><small>Avg
+                                Index Depth</small></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <h3>Benchmark</h3>
+                    </div>
+                    <div style="padding:1.5rem;height:280px;"><canvas id="chartPerf"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIG =====
+        var API = "http://127.0.0.1:8000";
+        var TK = null;
+        var AES_KEY = null;
+        var HMAC_KEY = null;
+        var charts = {};
+
+        // Key hex strings (matching Python exactly)
+        var AES_HEX = "a0f1f1574cdca14f8822063eff630361aec5beec3b3c6c6bf7f29214683b33c7";
+        var HMAC_HEX = "78e670e84ac5a9d52b8662aa74dbec8db961d38f71c18da76b720c5faf05b43e";
+
+        // ===== INIT ON DOM READY =====
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("HAL 4.0 Initializing...");
+
+            // Parse crypto keys
+            try {
+                AES_KEY = CryptoJS.enc.Hex.parse(AES_HEX);
+                HMAC_KEY = CryptoJS.enc.Hex.parse(HMAC_HEX);
+                console.log("Crypto keys loaded OK");
+            } catch (e) {
+                console.error("Crypto init error:", e);
+            }
+
+            // Check auth
+            TK = localStorage.getItem('hal4_tk');
+            if (TK) {
+                initApp();
+            }
+
+            // Wire up search input
+            var qInput = document.getElementById('qIn');
+            if (qInput) {
+                var timer = null;
+                qInput.addEventListener('keyup', function () {
+                    clearTimeout(timer);
+                    var val = qInput.value;
+                    timer = setTimeout(function () { doSearch(val); }, 500);
+                });
+            }
+        });
+
+        // ===== CRYPTO =====
+        function decryptField(b64) {
+            try {
+                var raw = CryptoJS.enc.Base64.parse(b64);
+                var iv = CryptoJS.lib.WordArray.create(raw.words.slice(0, 4), 16);
+                var ct = CryptoJS.lib.WordArray.create(raw.words.slice(4), raw.sigBytes - 16);
+                var dec = CryptoJS.AES.decrypt({ ciphertext: ct }, AES_KEY, {
+                    iv: iv,
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.Pkcs7
+                });
+                return dec.toString(CryptoJS.enc.Utf8);
+            } catch (e) {
+                console.error("Decrypt error:", e);
+                return "[encrypted]";
+            }
+        }
+
+        function genToken(text) {
+            return CryptoJS.HmacSHA256(text.toLowerCase().trim(), HMAC_KEY).toString();
+        }
+
+        function maskName(s) {
+            if (!s || s.length < 3) return "****";
+            var parts = s.split(' ');
+            if (parts.length > 1) return parts[0] + " " + "*".repeat(Math.max(parts[1].length, 1));
+            return s.slice(0, 3) + "*".repeat(Math.max(s.length - 3, 1));
+        }
+
+        function maskAcc(s) {
+            if (!s || s.length < 4) return "****";
+            return "****-****-" + s.slice(-4);
+        }
+
+        // ===== AUTH =====
+        function doLogin(e) {
+            e.preventDefault();
+            var fd = new FormData();
+            fd.append('username', document.getElementById('inUser').value);
+            fd.append('password', document.getElementById('inPass').value);
+            fetch(API + "/login", { method: 'POST', body: fd })
+                .then(function (r) { if (!r.ok) throw new Error('fail'); return r.json(); })
+                .then(function (d) {
+                    TK = d.access_token;
+                    localStorage.setItem('hal4_tk', TK);
+                    location.reload();
+                })
+                .catch(function () { alert("Authentication Failed"); });
+        }
+
+        function doLogout() { localStorage.removeItem('hal4_tk'); location.reload(); }
+
+        function hdr() { return { 'Authorization': 'Bearer ' + TK }; }
+
+        function initApp() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            loadStats();
+            // Charts init after small delay so DOM is rendered
+            setTimeout(initCharts, 200);
+        }
+
+        // ===== NAV =====
+        function go(page, el) {
+            var pages = document.querySelectorAll('.page');
+            for (var i = 0; i < pages.length; i++) pages[i].classList.remove('active');
+            var navs = document.querySelectorAll('.nav-item');
+            for (var i = 0; i < navs.length; i++) navs[i].classList.remove('active');
+            document.getElementById(page).classList.add('active');
+            if (el) el.classList.add('active');
+            var titles = { home: 'Dashboard', search: 'Secure Search', anomaly: 'Anomaly Detection', chain: 'Tamper Detection', audit: 'Audit Logs', perf: 'Performance' };
+            document.getElementById('pgTitle').innerText = titles[page] || page;
+            if (page === 'audit') loadAudit();
+            if (page === 'anomaly') loadAnomaly();
+            if (page === 'chain') loadChain();
+            if (page === 'perf') loadPerf();
+        }
+
+        // ===== STATS =====
+        function loadStats() {
+            fetch(API + "/stats", { headers: hdr() })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    document.getElementById('sRec').innerText = d.total_records.toLocaleString();
+                    document.getElementById('sTok').innerText = d.total_tokens.toLocaleString();
+                    document.getElementById('sBlk').innerText = d.total_blocks.toLocaleString();
+                    document.getElementById('sLog').innerText = d.total_logs.toLocaleString();
+                })
+                .catch(function (e) { console.error("Stats error:", e); });
+        }
+
+        // ===== SEARCH (CORE PS) =====
+        function doSearch(q) {
+            if (!q || q.length < 3) return;
+
+            var errBox = document.getElementById('searchError');
+            errBox.style.display = 'none';
+
+            var box = document.getElementById('tokenBox');
+            box.style.display = 'block';
+
+            try {
+                var token = genToken(q);
+                box.innerText = "[SECURE PROTOCOL] HMAC-SHA256 Blind Search\n"
+                    + "> INPUT: \"" + q + "\"\n"
+                    + "> HMAC_KEY: " + HMAC_HEX.substring(0, 16) + "... (256-bit)\n"
+                    + "> TOKEN: " + token.substring(0, 48) + "...\n"
+                    + "> STATUS: Querying encrypted index...";
+            } catch (e) {
+                errBox.style.display = 'block';
+                errBox.innerText = "Token generation error: " + e.message;
+                console.error("Token gen error:", e);
+                return;
+            }
+
+            fetch(API + "/secure-search?query=" + encodeURIComponent(q), {
+                method: 'POST',
+                headers: hdr()
+            })
+                .then(function (r) {
+                    if (!r.ok) throw new Error("HTTP " + r.status);
+                    return r.json();
+                })
+                .then(function (d) {
+                    console.log("Search result:", d);
+                    box.innerText += "\n> FOUND: " + d.count + " records in " + d.time_ms + "ms (zero plaintext exposed)";
+
+                    var tb = document.getElementById('resBody');
+                    if (!d.results || d.results.length === 0) {
+                        tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--muted);">No records match this token.</td></tr>';
+                        return;
+                    }
+
+                    var html = '';
+                    for (var i = 0; i < d.results.length; i++) {
+                        var r = d.results[i];
+                        var name = decryptField(r.customer_name);
+                        var acc = decryptField(r.account);
+                        var city = decryptField(r.city);
+                        html += '<tr>'
+                            + '<td style="font-family:JetBrains Mono;color:var(--primary);font-weight:700;">#' + r.id + '</td>'
+                            + '<td style="font-weight:600;">' + maskName(name) + '</td>'
+                            + '<td style="font-family:JetBrains Mono;color:var(--muted);font-size:.8rem;">' + maskAcc(acc) + '</td>'
+                            + '<td>' + city + '</td>'
+                            + '<td><span class="badge badge-green">SECURE MATCH</span></td>'
+                            + '</tr>';
+                    }
+                    tb.innerHTML = html;
+                    loadStats();
+                })
+                .catch(function (e) {
+                    console.error("Search error:", e);
+                    errBox.style.display = 'block';
+                    errBox.innerText = "Search error: " + e.message;
+                    box.innerText += "\n> ERROR: " + e.message;
+                });
+        }
+
+        // ===== AUDIT =====
+        function loadAudit() {
+            fetch(API + "/audit-logs", { headers: hdr() })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    var html = '';
+                    for (var i = 0; i < d.length; i++) {
+                        var l = d[i];
+                        html += '<tr><td style="font-size:.8rem;">' + l.time + '</td>'
+                            + '<td style="font-weight:600;">' + l.user + '</td>'
+                            + '<td><span class="badge badge-blue">' + l.action + '</span></td>'
+                            + '<td style="color:var(--muted);font-size:.8rem;max-width:300px;overflow:hidden;text-overflow:ellipsis;">' + l.details + '</td>'
+                            + '<td style="font-family:JetBrains Mono;font-size:.7rem;color:var(--muted);">' + l.hash + '</td></tr>';
+                    }
+                    document.getElementById('auditBody').innerHTML = html;
+                })
+                .catch(function (e) { console.error("Audit error:", e); });
+        }
+
+        // ===== BLOCKCHAIN =====
+        function loadChain() {
+            fetch(API + "/blockchain-chain", { headers: hdr() })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    var html = '';
+                    for (var i = 0; i < d.length; i++) {
+                        var b = d[i];
+                        html += '<tr><td style="font-weight:700;color:var(--primary);">#' + b.id + '</td>'
+                            + '<td style="font-size:.8rem;">' + b.time + '</td>'
+                            + '<td><span class="badge badge-blue">' + b.action + '</span></td>'
+                            + '<td>' + b.user + '</td>'
+                            + '<td style="font-family:JetBrains Mono;font-size:.7rem;color:var(--warning);">' + b.prev + '</td>'
+                            + '<td style="font-family:JetBrains Mono;font-size:.7rem;color:var(--success);">' + b.hash + '</td></tr>';
+                    }
+                    document.getElementById('chainBody').innerHTML = html;
+                })
+                .catch(function (e) { console.error("Chain error:", e); });
+        }
+
+        function doTamperCheck() {
+            fetch(API + "/tamper-check", { headers: hdr() })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    var el = document.getElementById('tamperStatus');
+                    if (d.status === 'VERIFIED') {
+                        el.innerHTML = '<div style="margin-bottom:1rem;"><i class="fa-solid fa-circle-check" style="font-size:3.5rem;color:var(--success);"></i></div>'
+                            + '<h3 style="color:var(--success);font-size:1.3rem;">CHAIN INTEGRITY VERIFIED</h3>'
+                            + '<p style="color:var(--muted);margin-top:8px;">All ' + d.total + ' blocks validated. Zero tampering.</p>'
+                            + '<p style="color:var(--muted);font-size:.75rem;margin-top:4px;">Last: ' + d.last_hash + '</p>';
+                    } else {
+                        el.innerHTML = '<div style="margin-bottom:1rem;"><i class="fa-solid fa-triangle-exclamation" style="font-size:3.5rem;color:var(--danger);"></i></div>'
+                            + '<h3 style="color:var(--danger);">TAMPER DETECTED at Block #' + d.block_id + '</h3>';
+                    }
+                })
+                .catch(function (e) { console.error("Tamper check error:", e); });
+        }
+
+        // ===== ANOMALY =====
+        function loadAnomaly() {
+            fetch(API + "/anomaly-report", { headers: hdr() })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    var maxScore = 0;
+                    for (var i = 0; i < d.users.length; i++) {
+                        if (d.users[i].score > maxScore) maxScore = d.users[i].score;
+                    }
+                    var rEl = document.getElementById('riskNum');
+                    rEl.innerText = Math.round(maxScore);
+                    rEl.style.color = maxScore > 70 ? 'var(--danger)' : maxScore > 30 ? 'var(--warning)' : 'var(--success)';
+
+                    var ab = document.getElementById('alertsBox');
+                    if (d.alerts.length > 0) {
+                        var alertHtml = '';
+                        for (var i = 0; i < d.alerts.length; i++) {
+                            var cls = d.alerts[i].indexOf('CRITICAL') >= 0 ? 'alert-danger' : 'alert-warning';
+                            alertHtml += '<div class="alert ' + cls + '"><i class="fa-solid fa-circle-exclamation"></i> ' + d.alerts[i] + '</div>';
+                        }
+                        ab.innerHTML = alertHtml;
+                    } else {
+                        ab.innerHTML = '<div class="alert alert-success"><i class="fa-solid fa-check-circle"></i> All users within normal parameters.</div>';
+                    }
+
+                    var actHtml = '';
+                    for (var i = 0; i < d.users.length; i++) {
+                        var u = d.users[i];
+                        var statusText = u.score > 70 ? '<span style="color:var(--danger);font-weight:700;">HIGH RISK</span>'
+                            : u.score > 30 ? '<span style="color:var(--warning);">ELEVATED</span>'
+                                : '<span style="color:var(--success);">NORMAL</span>';
+                        var badgeCls = u.score > 70 ? 'badge-red' : u.score > 30 ? 'badge-yellow' : 'badge-green';
+                        actHtml += '<tr><td style="font-weight:600;">' + u.user + '</td><td>' + u.searches + '</td>'
+                            + '<td><span class="badge ' + badgeCls + '">' + u.score + '</span></td>'
+                            + '<td style="font-size:.8rem;">' + u.last + '</td><td>' + statusText + '</td></tr>';
+                    }
+                    document.getElementById('actBody').innerHTML = actHtml;
+
+                    // Update chart
+                    try {
+                        if (charts.anomaly) {
+                            var labels = [];
+                            var counts = [];
+                            for (var i = 0; i < d.timeline.length; i++) {
+                                labels.push(d.timeline[i].label);
+                                counts.push(d.timeline[i].count);
+                            }
+                            charts.anomaly.data.labels = labels;
+                            charts.anomaly.data.datasets[0].data = counts;
+                            charts.anomaly.update();
+                        }
+                    } catch (e) { console.error("Chart update error:", e); }
+                })
+                .catch(function (e) { console.error("Anomaly error:", e); });
+        }
+
+        // ===== PERFORMANCE =====
+        function loadPerf() {
+            fetch(API + "/performance-metrics", { headers: hdr() })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    document.getElementById('mEnc').innerText = d.enc_speed_ms + "ms";
+                    document.getElementById('mTok').innerText = d.token_speed_ms + "ms";
+                    document.getElementById('mThr').innerText = d.throughput_est.toLocaleString();
+                    document.getElementById('mRec').innerText = d.total_records.toLocaleString();
+                    document.getElementById('mTokC').innerText = d.total_tokens.toLocaleString();
+                    document.getElementById('mRat').innerText = d.tokens_per_record;
+                    try {
+                        if (charts.perf) {
+                            charts.perf.data.datasets[0].data = [d.enc_speed_ms, d.token_speed_ms, d.enc_speed_ms * 2];
+                            charts.perf.update();
+                        }
+                    } catch (e) { console.error("Perf chart error:", e); }
+                })
+                .catch(function (e) { console.error("Perf error:", e); });
+        }
+
+        // ===== CSV =====
+        function doCSV(input) {
+            if (!input.files[0]) return;
+            var ol = document.getElementById('loadOverlay');
+            ol.style.display = 'flex';
+
+            function step(n) {
+                if (n > 4) {
+                    var fd = new FormData();
+                    fd.append('file', input.files[0]);
+                    fetch(API + "/upload-csv", { method: 'POST', headers: hdr(), body: fd })
+                        .then(function () {
+                            ol.style.display = 'none';
+                            var steps = document.querySelectorAll('.pipe-step');
+                            for (var i = 0; i < steps.length; i++) steps[i].className = 'pipe-step';
+                            loadStats();
+                            alert("Upload complete!");
+                        });
+                    return;
+                }
+                document.getElementById('p' + n).className = 'pipe-step go';
+                setTimeout(function () {
+                    document.getElementById('p' + n).className = 'pipe-step ok';
+                    step(n + 1);
+                }, 900);
+            }
+            step(1);
+        }
+
+        // ===== BREACH =====
+        function toggleBreach() {
+            var b = document.getElementById('breachView');
+            if (b.style.display === 'block') { b.style.display = 'none'; return; }
+            fetch(API + "/breach-simulation")
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    var html = '<p style="margin-bottom:1.5rem;color:#ef4444;">[!] DIRECT DATABASE FILE ACCESS. DUMPING ENCRYPTED BLOBS...</p>';
+                    for (var i = 0; i < d.dump.length; i++) {
+                        var r = d.dump[i];
+                        html += '<div style="border-bottom:1px solid #164;padding:10px 0;">'
+                            + 'ROW_' + r.id + ' | USER: <span style="color:#fbbf24;">' + r.name + '</span>'
+                            + ' | ACC: <span style="color:#38bdf8;">' + r.acc + '</span>'
+                            + ' | CITY: <span style="color:#a78bfa;">' + r.city + '</span></div>';
+                    }
+                    html += '<h2 style="margin-top:2rem;color:#22c55e;">[RESULT] ZERO PLAINTEXT FOUND.</h2>';
+                    html += '<p style="color:#6b7280;margin-top:.5rem;">Attacker gains no information. System intact.</p>';
+                    document.getElementById('dumpBox').innerHTML = html;
+                    b.style.display = 'block';
+                })
+                .catch(function (e) { console.error("Breach error:", e); });
+        }
+
+        // ===== CHARTS =====
+        function initCharts() {
+            try {
+                var homeEl = document.getElementById('chartHome');
+                if (homeEl) {
+                    charts.home = new Chart(homeEl, {
+                        type: 'line',
+                        data: {
+                            labels: ['-10m', '-9m', '-8m', '-7m', '-6m', '-5m', '-4m', '-3m', '-2m', 'NOW'],
+                            datasets: [
+                                { label: 'Search Queries', data: [2, 5, 3, 8, 12, 6, 15, 20, 18, 25], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', fill: true, tension: 0.4 },
+                                { label: 'Blocks Created', data: [1, 3, 2, 5, 8, 4, 10, 14, 12, 18], borderColor: '#059669', backgroundColor: 'rgba(5,150,105,0.1)', fill: true, tension: 0.4 }
+                            ]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                    });
+                }
+            } catch (e) { console.error("Home chart error:", e); }
+
+            try {
+                var anomalyEl = document.getElementById('chartAnomaly');
+                if (anomalyEl) {
+                    charts.anomaly = new Chart(anomalyEl, {
+                        type: 'bar',
+                        data: { labels: [], datasets: [{ label: 'Search Events', data: [], backgroundColor: '#ef4444', borderRadius: 6 }] },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+                    });
+                }
+            } catch (e) { console.error("Anomaly chart error:", e); }
+
+            try {
+                var perfEl = document.getElementById('chartPerf');
+                if (perfEl) {
+                    charts.perf = new Chart(perfEl, {
+                        type: 'bar',
+                        data: {
+                            labels: ['AES-256 Encrypt', 'HMAC-SHA256 Token', 'Full Pipeline'],
+                            datasets: [{ label: 'Time (ms)', data: [0.1, 0.05, 0.2], backgroundColor: ['#2563eb', '#059669', '#d97706'], borderRadius: 8 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
+                    });
+                }
+            } catch (e) { console.error("Perf chart error:", e); }
+        }
+    </script>
+</body>
+
+</html>

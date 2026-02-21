@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+.env
+venv/
+env/
+keys.txt
+test_search.py
+verify.py
+print_keys.py
