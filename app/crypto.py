@@ -8,11 +8,11 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 
 # ENTERPRISE KEY MANAGEMENT SYSTEM (KMS)
-# In PRD these would be in environment variables or HashiCorp Vault
+# Pulling from environment variables for Render deployment
 KMS_KEYS = {
-    "STORAGE_ENCRYPTION_KEY": b"a0f1f1574cdca14f8822063eff630361", # 32 bytes AES-256
-    "SEARCH_TOKEN_KEY": b"78e670e84ac5a9d52b8662aa74dbec8d",      # 32 bytes HMAC
-    "AUDIT_INTEGRITY_KEY": b"9d52b8662aa74dbec8db961d38f71c18"     # 32 bytes Blockchain
+    "STORAGE_ENCRYPTION_KEY": os.getenv("STORAGE_ENCRYPTION_KEY", "a0f1f1574cdca14f8822063eff630361").encode(), 
+    "SEARCH_TOKEN_KEY": os.getenv("SEARCH_TOKEN_KEY", "78e670e84ac5a9d52b8662aa74dbec8d").encode(),
+    "AUDIT_INTEGRITY_KEY": os.getenv("AUDIT_INTEGRITY_KEY", "9d52b8662aa74dbec8db961d38f71c18").encode()
 }
 
 def encrypt(plaintext: str) -> str:
