@@ -416,7 +416,7 @@
                 <div style="text-align:right;">
                     <div id="uName"
                         style="font-weight:800; font-family:'JetBrains Mono'; font-size:1.4rem; color:var(--primary); text-transform:uppercase;">
-                        OPERATOR_SECURE</div>
+                        SECURE_ACCESS</div>
                     <div
                         style="color:var(--accent); font-size:0.7rem; font-weight:800; display:flex; align-items:center; gap:8px; justify-content:flex-end; margin-top:5px;">
                         <i class="fa-solid fa-circle-check"></i> AES-256 / SHA-256 TUNNEL ACTIVE
@@ -623,7 +623,12 @@
     <script>
         // Deployment Config
         const urlParams = new URLSearchParams(window.location.search);
-        const API = urlParams.get('api') || "https://cipherproxy-backend.onrender.com" || "http://127.0.0.1:8000";
+        // Priority: URL Param > Current Origin (if not local) > Local
+        const API = urlParams.get('api') || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? "http://127.0.0.1:8000" : window.location.origin.replace('vercel.app', 'onrender.com').replace('frontend', 'backend'));
+
+        // Manual override if needed
+        const RENDER_API = "https://cipherproxy-backend.onrender.com";
+        const CURRENT_API = API.includes('localhost') ? API : RENDER_API;
         let TK = localStorage.getItem('hal4_tk');
         let chartH, chartA, chartP, chartR;
 
@@ -655,7 +660,7 @@
             viz.innerHTML += `<span style="color:var(--primary);">[TOKEN]</span> GEN_HASH: ${tok.substring(0, 32)}...<span class="cursor-blink"></span><br>`;
             viz.innerHTML += `<span style="color:var(--primary);">[BLIND]</span> Scanning 10,000 Identity Vectors...`;
 
-            fetch(`${API}/secure-search?query=${val}`, { method: 'POST', headers: hdr() }).then(r => {
+            fetch(`${CURRENT_API}/secure-search?query=${val}`, { method: 'POST', headers: hdr() }).then(r => {
                 if (r.status === 403) {
                     document.getElementById('lockdown').style.display = 'flex';
                     document.getElementById('badUser').innerText = localStorage.getItem('hal4_user') || 'ANON';
@@ -706,7 +711,7 @@
         }
 
         function loadStats() {
-            fetch(`${API}/stats`, { headers: hdr() }).then(r => r.json()).then(d => {
+            fetch(`${CURRENT_API}/stats`, { headers: hdr() }).then(r => r.json()).then(d => {
                 document.getElementById('sRec').innerText = (d.total_records || 0).toLocaleString();
                 document.getElementById('sTok').innerText = (d.total_tokens || 0).toLocaleString();
                 document.getElementById('sBlk').innerText = (d.total_blocks || 0).toLocaleString();
@@ -715,7 +720,7 @@
         }
 
         function loadAnomaly() {
-            fetch(`${API}/anomaly-report`, { headers: hdr() }).then(r => r.json()).then(d => {
+            fetch(`${CURRENT_API}/anomaly-report`, { headers: hdr() }).then(r => r.json()).then(d => {
                 const mainScore = Math.round(d.users[0]?.score || 0);
                 document.getElementById('riskVal').innerText = mainScore;
                 document.getElementById('riskBar').style.width = mainScore + '%';
@@ -746,7 +751,7 @@
         }
 
         function loadPerf() {
-            fetch(`${API}/performance-metrics`, { headers: hdr() }).then(r => r.json()).then(d => {
+            fetch(`${CURRENT_API}/performance-metrics`, { headers: hdr() }).then(r => r.json()).then(d => {
                 document.getElementById('pEnc').innerText = d.enc_speed_ms + "ms";
                 document.getElementById('pTok').innerText = d.tok_speed_ms + "ms";
                 document.getElementById('pThr').innerText = d.throughput + "k/s";
@@ -950,7 +955,7 @@
             const user = document.getElementById('userIn').value;
             const pass = document.getElementById('passIn').value;
 
-            fetch(`${API}/register?full_name=${name}&email=${email}&username=${user}&password=${pass}`, { method: 'POST' })
+            fetch(`${CURRENT_API}/register?full_name=${name}&email=${email}&username=${user}&password=${pass}`, { method: 'POST' })
                 .then(r => r.json()).then(d => {
                     if (d.status === 'success') {
                         alert("Account created! You can now log in.");
@@ -963,7 +968,7 @@
             const user = document.getElementById('userIn').value;
             const pass = document.getElementById('passIn').value;
             const fd = new FormData(); fd.append('username', user); fd.append('password', pass);
-            fetch(`${API}/login`, { method: 'POST', body: fd }).then(r => r.json()).then(d => {
+            fetch(`${CURRENT_API}/login`, { method: 'POST', body: fd }).then(r => r.json()).then(d => {
                 if (d.access_token) {
                     localStorage.setItem('hal4_tk', d.access_token);
                     localStorage.setItem('hal4_user', d.user_display || user);
