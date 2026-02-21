@@ -856,7 +856,7 @@
 
                 // Advance Column Offsets (RAIN)
                 for (let i = 0; i < this.columnsOffset.length; i++) {
-                    this.columnsOffset[i] += 0.8; // Falling speed
+                    this.columnsOffset[i] += 1.2; // Falling speed
                     if (this.columnsOffset[i] > this.charH) this.columnsOffset[i] = 0;
                 }
             }
@@ -1285,7 +1285,7 @@
             setInterval(() => { if (document.getElementById('anomaly').classList.contains('active')) loadAnomaly(); }, 3000);
             setInterval(() => { if (document.getElementById('perf').classList.contains('active')) loadPerf(); }, 3000);
         } else {
-            new LetterGlitch('glitchBg');
+            new LetterGlitch('glitchCanvas');
         }
 
         // Ensure prompt logic works for API stability
