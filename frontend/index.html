@@ -43,6 +43,8 @@
         #dashboard {
             display: none;
             flex-direction: row;
+            position: relative;
+            z-index: 10;
         }
 
         .sidebar {
@@ -168,15 +170,19 @@
             margin-left: 280px;
             width: calc(100% - 280px);
             padding: 2.5rem;
+            min-height: 100vh;
+            background: radial-gradient(circle at top right, rgba(0, 229, 255, 0.03), transparent 40%);
         }
 
         .card {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
             position: relative;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
         }
 
         .stats-grid {
@@ -217,11 +223,13 @@
 
         /* === SEARCH & TOKEN VIZ === */
         .search-area {
-            background: linear-gradient(135deg, #1e3a8a, #0b0d11);
-            padding: 3rem;
-            border-radius: 24px;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.8), rgba(11, 13, 17, 0.9));
+            padding: 4rem;
+            border-radius: 30px;
+            margin-bottom: 2.5rem;
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            position: relative;
         }
 
         .search-area input {
@@ -570,35 +578,57 @@
             <!-- PAGES -->
             <div id="home" class="page active">
                 <div class="card"
-                    style="background: linear-gradient(135deg, #1e3a8a, #0b0d11); border:none; padding:2.5rem;">
-                    <h2 style="margin-bottom:1rem;">Zero-Plaintext Search Intelligence</h2>
-                    <p style="color:rgba(255,255,255,0.7); max-width:800px; line-height:1.7;">State-of-the-art
-                        multi-dimensional searching over encrypted banking records. Every byte in the database is an
-                        AESnd is 100% blind to your plaintext queries.</p>
+                    style="background: linear-gradient(135deg, #1e40af, #0f172a); border: 1px solid rgba(255,255,255,0.1); padding:3rem; overflow:hidden;">
+                    <div
+                        style="position:absolute; top:-50px; right:-50px; width:200px; height:200px; background:var(--primary); filter:blur(100px); opacity:0.1;">
+                    </div>
+                    <h2 style="margin-bottom:1rem; font-size:2rem; font-weight:900;">Zero-Plaintext Search Intelligence
+                    </h2>
+                    <p style="color:rgba(226, 232, 240, 0.8); max-width:800px; line-height:1.8; font-size:1.1rem;">
+                        State-of-the-art multi-dimensional searching over encrypted banking records.
+                        Every byte in the database is an AESnd is 100% blind to your plaintext queries.
+                    </p>
                 </div>
-                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem;">
+                <div style="display:grid; grid-template-columns: 1.8fr 1.2fr; gap:2rem;">
                     <div class="card">
-                        <h4 style="margin-bottom:1rem;">Search Frequency (Live)</h4>
-                        <div style="height:320px;"><canvas id="chartHome"></canvas></div>
+                        <h4
+                            style="margin-bottom:1.5rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted);">
+                            Search Frequency (Live)</h4>
+                        <div style="height:350px;"><canvas id="chartHome"></canvas></div>
                     </div>
                     <div class="card">
-                        <h4 style="margin-bottom:1.5rem;">Security Protocol Status</h4>
-                        <div style="display:grid; gap:1.5rem;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
-                                <span>AES-256-CBC</span><span style="color:var(--accent);">ENABLED</span>
+                        <h4
+                            style="margin-bottom:2rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted);">
+                            Security Protocol Status</h4>
+                        <div style="display:grid; gap:1.2rem;">
+                            <div
+                                style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px;">
+                                <span style="font-weight:600;">AES-256-CBC</span>
+                                <span style="color:var(--accent); font-weight:900;"><i
+                                        class="fa-solid fa-circle-check"></i> ENABLED</span>
                             </div>
-                            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
-                                <span>HMAC-SHA256 Indices</span><span style="color:var(--accent);">ACTIVE</span>
+                            <div
+                                style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px;">
+                                <span style="font-weight:600;">HMAC-SHA256 Indices</span>
+                                <span style="color:var(--accent); font-weight:900;"><i
+                                        class="fa-solid fa-circle-check"></i> ACTIVE</span>
                             </div>
-                            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;"><span>Phonetic
-                                    Soundex</span><span style="color:var(--accent);">STANDBY</span></div>
-                            <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
-                                <span>Honeytoken Traps</span><span style="color:var(--warning);">ARMED</span>
+                            <div
+                                style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px;">
+                                <span style="font-weight:600;">Phonetic Soundex</span>
+                                <span style="color:var(--accent); font-weight:900;"><i class="fa-solid fa-bolt"></i>
+                                    STANDBY</span>
+                            </div>
+                            <div
+                                style="display:flex; justify-content:space-between; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; margin-bottom:1rem;">
+                                <span style="font-weight:600;">Honeytoken Traps</span>
+                                <span style="color:var(--warning); font-weight:900;"><i class="fa-solid fa-eye"></i>
+                                    ARMED</span>
                             </div>
 
-                            <button onclick="doSearch('admin_root')" class="btn-glow"
-                                style="background:var(--danger); font-size:0.7rem; padding:10px;">
-                                <i class="fa-solid fa-bomb"></i> TRIGGER TRAPDOOR TEST
+                            <button onclick="go('breach')" class="btn-glow"
+                                style="background:linear-gradient(to right, #ef4444, #7f1d1d); border:none; padding:15px;">
+                                <i class="fa-solid fa-triangle-exclamation"></i> INITIATE VULNERABILITY TEST
                             </button>
                         </div>
                     </div>
@@ -607,29 +637,35 @@
 
             <div id="search" class="page">
                 <div class="search-area">
-                    <i class="fa-solid fa-search"
-                        style="position:absolute; left:60px; top:54px; color:rgba(255,255,255,0.4); font-size:1.8rem;"></i>
-                    <input id="qIn" placeholder="Search Names, Phone, IFSC, or KYC IDs..."
-                        onkeyup="doSearch(this.value)">
-                    <div id="tokenViz"></div>
+                    <i class="fa-solid fa-magnifying-glass"
+                        style="position:absolute; left:60px; top:65px; color:var(--primary); font-size:2rem; text-shadow: 0 0 10px var(--primary);"></i>
+                    <input id="qIn" placeholder="Enter Name, Phone, Account, or KYC ID to Search Encrypted Database..."
+                        onkeyup="doSearch(this.value)" style="border: 2px solid rgba(0, 229, 255, 0.3);">
+                    <div id="tokenViz"
+                        style="border: 1px solid rgba(0, 255, 0, 0.2); box-shadow: inset 0 0 20px rgba(0,255,0,0.05); padding: 1.5rem; margin-top: 2rem;">
+                    </div>
                 </div>
-                <div class="table-container">
+                <div class="table-container"
+                    style="box-shadow: 0 20px 60px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.05);">
                     <table id="resTable">
                         <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Customer Profile</th>
-                                <th>Account Details</th>
-                                <th>Location</th>
-                                <th>Risk</th>
-                                <th>Match Intelligence</th>
+                            <tr style="background: rgba(255,255,255,0.02);">
+                                <th style="padding:20px;">ID</th>
+                                <th>Customer Entity</th>
+                                <th>Vaulted Account Details</th>
+                                <th>Regional Node</th>
+                                <th>Risk Analysis</th>
+                                <th style="text-align:right; padding-right:20px;">Protocol Logic</th>
                             </tr>
                         </thead>
                         <tbody id="resBody">
                             <tr>
                                 <td colspan="6"
-                                    style="text-align:center; padding:4rem; color:var(--muted); font-size:1.2rem;">
-                                    Awaiting Secure Tunnel Initialization...</td>
+                                    style="text-align:center; padding:6rem; color:var(--muted); font-size:1.4rem; font-weight:300;">
+                                    <i class="fa-solid fa-shield-halved fa-beat"
+                                        style="font-size:3rem; margin-bottom:1rem; display:block; color:var(--primary);"></i>
+                                    Awaiting Secure KMS Handshake...
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -676,26 +712,28 @@
             </div>
 
             <div id="tamper" class="page">
-                <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="card"
+                    style="display:flex; justify-content:space-between; align-items:center; background: linear-gradient(to right, rgba(16, 185, 129, 0.05), transparent);">
                     <div>
-                        <h3>Immutable Hash Chain</h3>
+                        <h3 style="color:var(--accent);"><i class="fa-solid fa-link"></i> Immutable Hash Chain</h3>
                         <p style="color:var(--muted);">Decentralized logging provides non-repudiation for every platform
                             action.</p>
                     </div>
-                    <button onclick="verifyChain()" class="btn-glow">VERIFY DATABASE INTEGRITY</button>
+                    <button onclick="verifyChain()" class="btn-glow"
+                        style="background:var(--accent); color:#000; font-weight:800;">VERIFY DATA INTEGRITY</button>
                 </div>
-                <div id="chainTimeline"></div>
+                <div id="chainTimeline" style="display:grid; gap:1rem;"></div>
             </div>
 
             <div id="audit" class="page">
-                <div class="table-container">
-                    <table>
+                <div class="table-container" style="border: 1px solid rgba(59, 130, 246, 0.2);">
+                    <table id="auditTable">
                         <thead>
-                            <tr>
-                                <th>UTC Timestamp</th>
+                            <tr style="background: rgba(59, 130, 246, 0.05);">
+                                <th style="padding:18px;">UTC Timestamp</th>
                                 <th>Operator</th>
                                 <th>Action Performed</th>
-                                <th>Cryptographic Proof</th>
+                                <th style="text-align:right; padding-right:18px;">Cryptographic Proof</th>
                             </tr>
                         </thead>
                         <tbody id="auditBody"></tbody>
@@ -704,48 +742,66 @@
             </div>
 
             <div id="perf" class="page">
-                <div class="card">
-                    <h4>Throughput Benchmarking (10k Identities)</h4>
-                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1.5rem; margin-top:2rem;">
-                        <div class="stat-card" style="text-align:center;"><label>Enc Latency</label>
-                            <div class="val" id="pEnc">0ms</div>
+                <div class="card" style="background: linear-gradient(to bottom, rgba(0, 229, 255, 0.05), transparent);">
+                    <h4 style="margin-bottom:2rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted);">
+                        Throughput Benchmarking (10k Identities)</h4>
+                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:2rem;">
+                        <div class="stat-card"
+                            style="text-align:center; border-left:none; border-bottom:4px solid var(--primary);">
+                            <label>Enc Latency</label>
+                            <div class="val" id="pEnc" style="color:var(--primary);">0ms</div>
                         </div>
-                        <div class="stat-card" style="text-align:center;"><label>Token Latency</label>
-                            <div class="val" id="pTok">0ms</div>
+                        <div class="stat-card"
+                            style="text-align:center; border-left:none; border-bottom:4px solid var(--primary);">
+                            <label>Token Latency</label>
+                            <div class="val" id="pTok" style="color:var(--primary);">0ms</div>
                         </div>
-                        <div class="stat-card" style="text-align:center;"><label>I/O Ops/Sec</label>
-                            <div class="val" id="pThr">0</div>
+                        <div class="stat-card"
+                            style="text-align:center; border-left:none; border-bottom:4px solid var(--primary);">
+                            <label>I/O Ops/Sec</label>
+                            <div class="val" id="pThr" style="color:var(--primary);">0</div>
                         </div>
                     </div>
                 </div>
-                <div class="card">
-                    <h4>Processing Latency Graph</h4>
-                    <div style="height:350px;"><canvas id="chartPerf"></canvas></div>
-                </div>
-            </div>
-
-            <div id="breach" class="page">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
-                    <div>
-                        <h3>Cybersecurity Breach Simulator</h3>
-                        <p style="color:var(--muted);">Simulate raw access to the storage layer without application
-                            keys.</p>
-                    </div>
-                    <button onclick="loadBreach()" class="btn-glow" style="background:var(--danger);"><i
-                            class="fa-solid fa-skull-crossbones"></i> INITIATE BREACH</button>
-                </div>
-                <div class="terminal" id="termBody">
-                    <p style="color:#0f0;">[SESSION READY] WAITING FOR BREACH EVENT...</p>
-                </div>
-                <div style="margin-top:2rem; background:rgba(34,197,94,0.1); padding:1.5rem; border-radius:16px; border:1px solid var(--accent); display:none;"
-                    id="breachResult">
-                    <h3 style="color:var(--accent); margin-bottom:0.5rem;"><i class="fa-solid fa-shield-check"></i>
-                        BREACH MITIGATED: ZERO PLAINTEXT DATA DISCOVERED</h3>
-                    <p style="font-size:0.9rem;">The simulation confirms that while the attacker gained raw DB access,
-                        the absence of KMS keys rendered all PII strictly unreadable.</p>
-                </div>
+                <div class="val" id="pThr">0</div>
             </div>
         </div>
+    </div>
+    <div class="card">
+        <h4>Processing Latency Graph</h4>
+        <div style="height:350px;"><canvas id="chartPerf"></canvas></div>
+    </div>
+    </div>
+
+    <div id="breach" class="page">
+        <div
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem; background: rgba(239, 68, 68, 0.05); padding: 2rem; border-radius: 20px; border: 1px solid rgba(239, 68, 68, 0.1);">
+            <div>
+                <h3 style="color:var(--danger); font-size:1.8rem; font-weight:900;"><i
+                        class="fa-solid fa-biohazard"></i> Breach Simulator</h3>
+                <p style="color:var(--muted);">Simulate raw access to the storage layer without application keys.</p>
+            </div>
+            <button onclick="loadBreach()" class="btn-glow"
+                style="background:linear-gradient(to right, #ef4444, #991b1b); font-weight:900; padding:15px 30px;">
+                <i class="fa-solid fa-skull-crossbones"></i> INITIATE BREACH
+            </button>
+        </div>
+        <div class="terminal" id="termBody" style="border: 2px solid #330000; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+            <p style="color:#ef4444; font-weight:900;">[SESSION READY] WAITING FOR BREACH EVENT...</p>
+        </div>
+        <div style="margin-top:2rem; background:rgba(34,197,94,0.1); padding:2rem; border-radius:16px; border:2px solid var(--accent); display:none; animation: slideIn 0.5s ease;"
+            id="breachResult">
+            <h3 style="color:var(--accent); margin-bottom:1rem; font-size:1.5rem; font-weight:900;">
+                <i class="fa-solid fa-shield-circle-check"></i> BREACH MITIGATED: DATA PROTECTED
+            </h3>
+            <p style="font-size:1rem; color:rgba(255,255,255,0.8); line-height:1.6;">
+                The simulation confirms that while the attacker gained raw DB access,
+                the **Zero-Plaintext architecture** rendered all records strictly unreadable.
+                No PII was compromised.
+            </p>
+        </div>
+    </div>
+    </div>
     </div>
 
     <script>
