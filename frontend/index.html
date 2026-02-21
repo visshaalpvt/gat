@@ -403,7 +403,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.1);
+            background: transparent;
             z-index: 1;
             display: flex;
             align-items: center;
@@ -416,7 +416,7 @@
             inset: 0;
             pointer-events: none;
             z-index: 2;
-            background: radial-gradient(circle, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.95) 100%);
+            background: radial-gradient(circle, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.8) 100%);
         }
 
         .vignette-center {
@@ -424,7 +424,7 @@
             inset: 0;
             pointer-events: none;
             z-index: 2;
-            background: radial-gradient(circle, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 75%);
+            background: radial-gradient(circle, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
         }
     </style>
 </head>
@@ -445,7 +445,7 @@
 
     <div id="loginPage" class="login-overlay" style="display:flex;">
         <div
-            style="background: rgba(8, 10, 15, 0.9); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); padding: 3rem; border-radius: 30px; width: 100%; max-width: 450px; border: 1px solid rgba(255, 255, 255, 0.05); text-align: center; box-shadow: 0 40px 100px rgba(0,0,0,0.95); position: relative; z-index: 10;">
+            style="background: rgba(15, 17, 22, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 3rem; border-radius: 30px; width: 100%; max-width: 450px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.8); position: relative; z-index: 10;">
             <div
                 style="font-size:3.5rem; color:var(--primary); margin-bottom:1rem; text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);">
                 <i class="fa-solid fa-user-shield"></i>
@@ -793,7 +793,7 @@
                 this.fontSize = 16;
                 this.charW = 12;
                 this.charH = 22;
-                this.glitchSpeed = 30; // FASTER TRANSITIONS
+                this.glitchSpeed = 60;
 
                 this.grid = { cols: 0, rows: 0 };
                 this.cells = [];
@@ -830,7 +830,7 @@
                         char: this.glyphs[Math.floor(Math.random() * this.glyphs.length)],
                         rgb: { ...rgb },
                         targetRgb: { ...rgb },
-                        opacity: 0.2 + Math.random() * 0.6
+                        opacity: 0.1 + Math.random() * 0.4
                     };
                 });
             }
@@ -856,7 +856,7 @@
 
                 // Advance Column Offsets (RAIN)
                 for (let i = 0; i < this.columnsOffset.length; i++) {
-                    this.columnsOffset[i] += 2.0; // Falling speed (FAST)
+                    this.columnsOffset[i] += 1.2; // Falling speed
                     if (this.columnsOffset[i] > this.charH) this.columnsOffset[i] = 0;
                 }
             }
