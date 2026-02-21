@@ -99,8 +99,15 @@ async def secure_search(query: str,
                  f"CRITICAL: User tried to access forbidden honeytoken: {query}")
         raise HTTPException(status_code=403, detail="CRITICAL SECURITY BREACH DETECTED. AUTHORIZATION REVOKED.")
 
-    token = generate_search_token(query)
-    matches = db.query(SearchToken).filter(SearchToken.token == token).limit(50).all()
+    # Generate all query variants (Exact + Phonetic)
+    query_tokens = [generate_search_token(query.lower().strip())]
+    if " " not in query.strip(): # For single names, allow phonetic
+        from app.crypto import phonetic_encode
+        soundex = phonetic_encode(query.strip())
+        query_tokens.append(generate_search_token("FUZZY_" + soundex))
+
+    # Match against any of the tokens
+    matches = db.query(SearchToken).filter(SearchToken.token.in_(query_tokens)).limit(50).all()
 
     results = []
     seen = set()
@@ -119,8 +126,9 @@ async def secure_search(query: str,
 
     elapsed = round((time.time() - t0) * 1000, 2)
     add_block(db, current_user.username, "SEARCH",
-              f"query_token={token[:16]}... results={len(results)} time={elapsed}ms")
-    return {"results": results, "token": token, "time_ms": elapsed, "count": len(results)}
+              f"query='{query}' results={len(results)} time={elapsed}ms")
+    return {"results": results, "time_ms": elapsed, "count": len(results)}
+
 
 
 # ===== BLOCKCHAIN — TAMPER CHECK =====

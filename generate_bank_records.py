@@ -14,7 +14,8 @@ def generate_10k_records():
     names = ["John Smith", "Sarah Miller", "Michael Chen", "Emma Watson", "David Brown", "Olivia Garcia", 
              "James Wilson", "Sophia Martinez", "Robert Taylor", "Isabella Anderson", "William Lee", 
              "Mia Hernandez", "Joseph Moore", "Charlotte Young", "Thomas White", "Amelia King",
-             "Rahul Sharma", "Priya Patel", "Amit Kumar", "Sneha Gupta", "Vikram Singh", "Ananya Reddy"]
+             "Rahul Sharma", "Rahool Sharma", "Ragul Sharma", "Sarra Miller", "Maikel Chen",
+             "Priya Patel", "Amit Kumar", "Sneha Gupta", "Vikram Singh", "Ananya Reddy"]
     
     cities = ["New York", "London", "Chennai", "Mumbai", "Dubai", "Singapore", "Toronto", "Sydney", 
               "Paris", "Tokyo", "Berlin", "Bangalore", "Delhi", "Hyderabad"]

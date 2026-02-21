@@ -34,20 +34,50 @@ def decrypt_server(ciphertext_b64: str) -> str:
     return padded[:-pad_len].decode('utf-8')
 
 
+def phonetic_encode(name: str) -> str:
+    """Manual Soundex implementation for phonetic matching"""
+    if not name: return "Z000"
+    name = name.upper()
+    first = name[0]
+    mapping = {
+        'BFPV': '1', 'CGJKQSXZ': '2', 'DT': '3',
+        'L': '4', 'MN': '5', 'R': '6'
+    }
+    
+    codes = ""
+    for char in name[1:]:
+        for k, v in mapping.items():
+            if char in k:
+                if not codes or codes[-1] != v:
+                    codes += v
+                break
+    
+    clean = (codes.replace("0", ""))[:3]
+    return (first + clean).ljust(4, "0")
+
 def generate_search_token(text: str) -> str:
     """HMAC-SHA256 token for blind index search"""
     h = HMAC.new(HMAC_KEY, digestmod=SHA256)
     h.update(text.lower().strip().encode('utf-8'))
     return h.hexdigest()
 
-
 def generate_prefixes(text: str):
-    """Generate search tokens for the full word and all prefixes >= 3 chars"""
-    clean = text.lower().strip()
-    tokens = [generate_search_token(clean)]
-    for i in range(3, len(clean)):
-        tokens.append(generate_search_token(clean[:i]))
-    return list(set(tokens))
+    """Generate search tokens for the full word, prefixes, and phonetic variants"""
+    words = text.lower().strip().split()
+    all_tokens = []
+    
+    for word in words:
+        if len(word) < 2: continue
+        # 1. Exact/Prefix Tokens
+        all_tokens.append(generate_search_token(word))
+        for i in range(3, len(word)):
+            all_tokens.append(generate_search_token(word[:i]))
+        
+        # 2. Phonetic token (THE WINNING FEATURE)
+        soundex = phonetic_encode(word)
+        all_tokens.append(generate_search_token("FUZZY_" + soundex))
+        
+    return list(set(all_tokens))
 
 
 def mask_data(text: str, visible_chars: int = 4) -> str:
