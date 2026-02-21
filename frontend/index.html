@@ -621,14 +621,34 @@
     </div>
 
     <script>
-        // SMART BACKEND DISCOVERY
-        const getBaseAPI = () => {
-            const host = window.location.hostname;
-            if (host === 'localhost' || host === '127.0.0.1') return "http://127.0.0.1:8000";
-            return "https://cipherproxy-backend.onrender.com";
-        };
+        // SMART BACKEND DISCOVERY & PROBE
+        let CURRENT_API = localStorage.getItem('hal4_api_override') || "https://cipherproxy-backend.onrender.com";
 
-        const CURRENT_API = getBaseAPI();
+        const probeBackends = async () => {
+            if (localStorage.getItem('hal4_api_override')) return;
+
+            const host = window.location.hostname;
+            const base = host.split('.')[0].replace('-beta', '').replace('-frontend', '');
+            const candidates = [
+                `https://${base}.onrender.com`,
+                "https://cipherproxy-backend.onrender.com",
+                "https://gat.onrender.com",
+                "http://127.0.0.1:8000"
+            ];
+
+            for (let url of candidates) {
+                try {
+                    const res = await fetch(url + '/stats', { method: 'GET' });
+                    if (res.ok || res.status === 401) {
+                        console.log("Found Active Backend:", url);
+                        CURRENT_API = url;
+                        return;
+                    }
+                } catch (e) { }
+            }
+        };
+        probeBackends();
+
         let TK = localStorage.getItem('hal4_tk');
         let chartH, chartA, chartP, chartR;
 
@@ -989,7 +1009,11 @@
                 })
                 .catch(err => {
                     console.error("Login Error:", err);
-                    alert(`SYSTEM_OFFLINE: Could not reach Security Backend at ${CURRENT_API}\n\n1. Wait 60s for Render to wake up (Cold Start).\n2. Try again in a minute.`);
+                    const promptUrl = prompt(`SYSTEM_OFFLINE: Could not reach Security Backend at ${CURRENT_API}\n\nPlease paste your REAL Render URL (e.g. https://your-app.onrender.com) to connect manually:`, CURRENT_API);
+                    if (promptUrl && promptUrl !== CURRENT_API) {
+                        localStorage.setItem('hal4_api_override', promptUrl);
+                        location.reload();
+                    }
                 });
         }
 
