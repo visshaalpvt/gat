@@ -73,13 +73,24 @@ class UserActivity(Base):
 def init_db():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
+    from passlib.context import CryptContext
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
     if not db.query(User).filter(User.username == "admin").first():
-        from passlib.context import CryptContext
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         admin = User(username="admin", hashed_password=pwd_context.hash("admin123"))
         db.add(admin)
-        db.commit()
+    
+    if not db.query(User).filter(User.username == "manager_k").first():
+        manager = User(username="manager_k", hashed_password=pwd_context.hash("manager123"))
+        db.add(manager)
+
+    if not db.query(User).filter(User.username == "clerk_j").first():
+        clerk = User(username="clerk_j", hashed_password=pwd_context.hash("clerk123"))
+        db.add(clerk)
+
+    db.commit()
     db.close()
+
 
 if __name__ == "__main__":
     init_db()

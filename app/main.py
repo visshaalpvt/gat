@@ -52,6 +52,9 @@ def add_block(db: Session, user: str, action: str, details: str):
             act.risk_score = min(100, act.risk_score + 8)
         elif act.search_count > 20:
             act.risk_score = min(100, act.risk_score + 3)
+    elif action == "TRAPDOOR_TRIGGERED":
+        act.risk_score = 100
+        
     act.last_action_time = ts
     db.commit()
 
@@ -63,9 +66,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
     user = db.query(User).filter(User.username == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    token = create_access_token(data={"sub": user.username})
-    add_block(db, user.username, "LOGIN", "JWT authentication successful")
-    return {"access_token": token, "token_type": "bearer"}
+    # For demo roles: admin=Admin, manager=Manager, any other=Clerk
+    role = "Admin" if user.username == "admin" else "Manager" if "manager" in user.username else "Clerk"
+    token = create_access_token(data={"sub": user.username, "role": role})
+    add_block(db, user.username, "LOGIN", f"JWT authentication successful. Role: {role}")
+    return {"access_token": token, "token_type": "bearer", "role": role}
 
 
 # ===== STATS =====
@@ -86,6 +91,14 @@ async def secure_search(query: str,
                          db: Session = Depends(get_db),
                          current_user: User = Depends(get_current_user)):
     t0 = time.time()
+    
+    # --- FEATURE: HONEYTOKEN TRAPDOOR ---
+    honeytokens = ["admin_root", "password_db", "master_key", "dump_all", "sql_inject"]
+    if query.lower().strip() in honeytokens:
+        add_block(db, current_user.username, "TRAPDOOR_TRIGGERED", 
+                 f"CRITICAL: User tried to access forbidden honeytoken: {query}")
+        raise HTTPException(status_code=403, detail="CRITICAL SECURITY BREACH DETECTED. AUTHORIZATION REVOKED.")
+
     token = generate_search_token(query)
     matches = db.query(SearchToken).filter(SearchToken.token == token).limit(50).all()
 
@@ -151,15 +164,11 @@ async def anomaly_report(db: Session = Depends(get_db),
     activities = db.query(UserActivity).all()
     alerts = []
     for a in activities:
-        level = "NORMAL"
         if a.risk_score > 70:
-            level = "CRITICAL"
-            alerts.append(f"User '{a.user}': Data scraping behavior (score {a.risk_score})")
+            alerts.append(f"CRITICAL: User '{a.user}' risk score is {a.risk_score}%")
         elif a.risk_score > 30:
-            level = "WARNING"
-            alerts.append(f"User '{a.user}': Unusual search frequency (score {a.risk_score})")
+            alerts.append(f"WARNING: User '{a.user}' unusual activity (score {a.risk_score}%)")
 
-    # Search frequency timeline (last 10 minutes)
     now = datetime.utcnow()
     timeline = []
     for i in range(10):
@@ -184,37 +193,26 @@ async def anomaly_report(db: Session = Depends(get_db),
 @app.get("/performance-metrics")
 async def perf_metrics(db: Session = Depends(get_db),
                        current_user: User = Depends(get_current_user)):
-    # Run a live encryption benchmark
     t0 = time.time()
-    for _ in range(100):
-        encrypt("benchmark-test-string-12345")
-    enc_time = round((time.time() - t0) / 100 * 1000, 3)
-
-    # Run a live search benchmark
-    t0 = time.time()
-    for _ in range(100):
-        generate_search_token("benchmark")
-    tok_time = round((time.time() - t0) / 100 * 1000, 3)
-
-    total_rec = db.query(BankRecord).count()
-    total_tok = db.query(SearchToken).count()
+    for _ in range(50):
+        encrypt("bench")
+    enc_time = round((time.time() - t0) / 50 * 1000, 3)
 
     return {
         "enc_speed_ms": enc_time,
-        "token_speed_ms": tok_time,
-        "total_records": total_rec,
-        "total_tokens": total_tok,
-        "tokens_per_record": round(total_tok / max(total_rec, 1), 1),
-        "throughput_est": round(1000 / max(enc_time, 0.001)),
+        "total_records": db.query(BankRecord).count(),
+        "total_tokens": db.query(SearchToken).count(),
     }
 
 
-# ===== CSV UPLOAD =====
-def process_csv(content: str, user: str):
+# ===== OPTIMIZED CSV UPLOAD (BATCHING) =====
+def process_csv_task(content: str, user: str):
     db = SessionLocal()
     try:
         reader = csv.DictReader(io.StringIO(content))
+        batch_size = 500
         count = 0
+        
         for row in reader:
             rec = BankRecord(
                 customer_id=encrypt(row.get('customer_id', '')),
@@ -226,36 +224,42 @@ def process_csv(content: str, user: str):
                 balance=encrypt(row.get('balance', '0'))
             )
             db.add(rec)
-            db.flush()
-            for t in set(generate_prefixes(row.get('customer_name', '')) +
-                         generate_prefixes(row.get('city', ''))):
-                db.add(SearchToken(token=t, record_id=rec.id))
+            db.flush() # Get ID
+            
+            prefixes = generate_prefixes(row.get('customer_name', '')) + generate_prefixes(row.get('city', ''))
+            for p in set(prefixes):
+                db.add(SearchToken(token=p, record_id=rec.id))
+            
             count += 1
+            if count % batch_size == 0:
+                db.commit()
+                print(f"Batch committed: {count} records")
+        
         db.commit()
-        add_block(db, user, "CSV_UPLOAD", f"{count} records encrypted and indexed")
+        add_block(db, user, "CSV_UPLOAD_COMPLETE", f"Processed {count} records in background.")
     except Exception as e:
+        print(f"ERROR LOADING CSV: {e}")
         db.rollback()
     finally:
         db.close()
 
-
 @app.post("/upload-csv")
 async def upload_csv(bg: BackgroundTasks, file: UploadFile = File(...),
-                     current_user: User = Depends(get_current_user),
-                     db: Session = Depends(get_db)):
+                      current_user: User = Depends(get_current_user),
+                      db: Session = Depends(get_db)):
     content = (await file.read()).decode('utf-8')
-    add_block(db, current_user.username, "CSV_UPLOAD_START", file.filename)
-    bg.add_task(process_csv, content, current_user.username)
-    return {"message": "Processing started"}
+    add_block(db, current_user.username, "CSV_UPLOAD_START", f"File: {file.filename}")
+    bg.add_task(process_csv_task, content, current_user.username)
+    return {"message": "CSV ingestion started in background."}
 
 
 # ===== BREACH SIMULATION =====
 @app.get("/breach-simulation")
 async def breach(db: Session = Depends(get_db)):
     recs = db.query(BankRecord).limit(15).all()
-    return {"dump": [{"id": r.id, "name": r.customer_name[:40] + "...",
-                      "acc": r.account_number[:40] + "...",
-                      "city": r.city[:40] + "..."} for r in recs]}
+    return {"dump": [{"id": r.id, "name": r.customer_name[:40],
+                      "acc": r.account_number[:40],
+                      "city": r.city[:40]} for r in recs]}
 
 
 # ===== SERVE FRONTEND =====
