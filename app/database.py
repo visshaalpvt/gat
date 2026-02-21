@@ -16,6 +16,8 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
+    full_name = Column(String)
     hashed_password = Column(String)
     role = Column(String) # Super Admin, Security Analyst, Auditor, Bank Officer
 
@@ -88,9 +90,11 @@ def init_db():
     }
     
     for username, role in roles.items():
-        if not db.query(User).filter(User.username == username).first():
+        if not db.query(User).filter((User.username == username) | (User.email == f"{username}@hal.com")).first():
             new_user = User(
-                username=username, 
+                username=username,
+                email=f"{username}@hal.com",
+                full_name=f"Enterprise {username.capitalize()}",
                 hashed_password=pwd_context.hash(f"{username}123"),
                 role=role
             )

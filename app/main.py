@@ -18,7 +18,7 @@ from app.crypto import (encrypt, decrypt_server, generate_search_token,
                          generate_prefixes, calculate_block_hash)
 from app.auth import create_access_token, get_current_user, verify_password, get_db, ACCESS_TOKEN_EXPIRE_MINUTES
 
-app = FastAPI(title="HAL 4.0 — Enterprise Banking Intelligence")
+app = FastAPI(title="CipherProxy — Enterprise Privacy Engine")
 init_db()
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
@@ -105,27 +105,59 @@ def add_block(db: Session, user: str, action: str, details: str, mode: str = "UN
 
     if action == "SEARCH":
         act.search_count += 1
-        if act.search_count > 50: act.risk_score = min(100, act.risk_score + 8)
-        elif act.search_count > 20: act.risk_score = min(100, act.risk_score + 3)
+        
+        # Rapid Search Burst Detection (Insiders scraping data)
+        time_diff = (ts - act.last_burst_time).total_seconds()
+        if time_diff < 2.0: # Searches less than 2 seconds apart
+            act.burst_count += 1
+            if act.burst_count > 5:
+                act.risk_score = min(100, act.risk_score + 15)
+                action = "RAPID_SEARCH_DETECTION"
+                details = f"Anomaly: {act.burst_count} searches in < 10s. Scraping suspected."
+        else:
+            act.burst_count = 0
+            act.last_burst_time = ts
+
+        if act.search_count > 50: act.risk_score = min(100, act.risk_score + 5)
+        elif act.search_count > 20: act.risk_score = min(100, act.risk_score + 2)
+        
     elif action == "TRAPDOOR_TRIGGERED":
         act.risk_score = 100
+        details = "CRITICAL: Insider attempting to access restricted cryptographic honeytokens."
         
     act.last_action_time = ts
     db.commit()
 
+# ===== MAIL AUTOMATION ENGINE =====
+def trigger_mail_automation(email: str, username: str, role: str):
+    """Simulates enterprise mail automation when user logs in via email"""
+    print(f"AUTOMATION_TRIGGERED: Sending security session initialization to {email}")
+    # In a real system, this would use SMTP or an API like SendGrid/SES
+    # For now, we log the automation event
+    time.sleep(1) # Simulation delay
+    print(f"MAIL_SENT: Session initialized for {username} [{role}]")
+
 # ===== API ENDPOINTS =====
 @app.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == form_data.username).first()
+async def login(background_tasks: BackgroundTasks, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    # Login with either username or email
+    user = db.query(User).filter(
+        (User.username == form_data.username) | (User.email == form_data.username)
+    ).first()
+    
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # If logged in via email, trigger the mail automation engine
+    if form_data.username == user.email:
+        background_tasks.add_task(trigger_mail_automation, user.email, user.username, user.role)
     
     token = create_access_token(
         data={"sub": user.username, "role": user.role}, 
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
-    add_block(db, user.username, "LOGIN", f"Identity verified. Session started for Role: {user.role}")
-    return {"access_token": token, "token_type": "bearer", "role": user.role}
+    add_block(db, user.username, "LOGIN", f"Identity verified via {'EMAIL' if form_data.username == user.email else 'USERNAME'}. Session started for Role: {user.role}")
+    return {"access_token": token, "token_type": "bearer", "role": user.role, "user_display": user.full_name or user.username}
 
 @app.get("/stats")
 async def stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -135,6 +167,25 @@ async def stats(db: Session = Depends(get_db), current_user: User = Depends(get_
         "total_blocks": db.query(BlockchainBlock).count(),
         "total_logs": db.query(AuditLog).count(),
     }
+
+@app.post("/register")
+async def register(full_name: str, email: str, username: str, password: str, db: Session = Depends(get_db)):
+    # Check if user already exists
+    existing = db.query(User).filter((User.username == username) | (User.email == email)).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Username or Email already registered")
+    
+    from app.auth import get_password_hash
+    new_user = User(
+        username=username,
+        email=email,
+        full_name=full_name,
+        hashed_password=get_password_hash(password),
+        role="Bank Officer" # Default role for new signups
+    )
+    db.add(new_user)
+    db.commit()
+    return {"status": "success", "message": "Account created successfully"}
 
 @app.post("/secure-search")
 async def secure_search(query: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

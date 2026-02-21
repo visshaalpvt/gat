@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HAL 4.0 — Enterprise Banking Command Center</title>
+    <title>CipherProxy — Enterprise Privacy Engine</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
         rel="stylesheet">
@@ -319,38 +319,65 @@
     <div id="loginPage"
         style="display:flex; align-items:center; justify-content:center; height:100vh; background: radial-gradient(circle at center, #1e3a8a, #0b0d11);">
         <div
-            style="background: var(--card); padding: 4rem; border-radius: 30px; width: 450px; border: 1px solid var(--border); text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-            <div style="font-size:4rem; color:var(--primary); margin-bottom:1.5rem;"><i class="fa-solid fa-vault"></i>
+            style="background: var(--card); padding: 3rem; border-radius: 30px; width: 450px; border: 1px solid var(--border); text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="font-size:3.5rem; color:var(--primary); margin-bottom:1rem;"><i
+                    class="fa-solid fa-user-shield"></i>
             </div>
-            <h1 style="font-weight:900; letter-spacing:-1px;">HAL 4.0</h1>
-            <p style="color:var(--muted); margin-bottom:2.5rem; font-size:0.9rem;">Enterprise Banking Command & Control
-            </p>
-            <form onsubmit="doLogin(event)">
-                <div style="text-align:left; margin-bottom:1rem;">
-                    <label
-                        style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Identity</label>
-                    <input type="text" id="userIn" placeholder="e.g. admin" value="admin"
-                        style="width: 100%; padding: 16px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+            <h1 style="font-weight:900; letter-spacing:-1px; font-size:2rem;" id="authTitle">CipherProxy</h1>
+            <p style="color:var(--muted); margin-bottom:2rem; font-size:0.85rem;" id="authDesc">Enterprise Privacy
+                Engine</p>
+
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div id="registerFields" style="display:none;">
+                    <div style="text-align:left; margin-bottom:1rem;">
+                        <label
+                            style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Full
+                            Name</label>
+                        <input type="text" id="regName" placeholder="e.g. John Doe"
+                            style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                    </div>
+                    <div style="text-align:left; margin-bottom:1rem;">
+                        <label
+                            style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Email
+                            Address</label>
+                        <input type="email" id="regEmail" placeholder="e.g. user@hal.com"
+                            style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                    </div>
                 </div>
-                <div style="text-align:left; margin-bottom:2rem;">
+
+                <div style="text-align:left; margin-bottom:1rem;">
+                    <label id="idLabel"
+                        style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Identity
+                        (Username or Email)</label>
+                    <input type="text" id="userIn" placeholder="e.g. admin@hal.com"
+                        style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                </div>
+                <div style="text-align:left; margin-bottom:1.5rem;">
                     <label
                         style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Access
                         Key</label>
-                    <input type="password" id="passIn" placeholder="••••••••" value="admin123"
-                        style="width: 100%; padding: 16px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                    <input type="password" id="passIn" placeholder="••••••••"
+                        style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
                 </div>
-                <button class="btn-glow" style="width:100%; padding:18px;">INITIALIZE SESSION</button>
+                <button class="btn-glow" style="width:100%; padding:16px;" id="authBtn">INITIALIZE SESSION</button>
             </form>
-            <div style="margin-top:2rem; font-size:0.7rem; color:var(--muted);">ROLES: admin, analyst, auditor, officer
+
+            <div style="margin-top:1.5rem; font-size:0.85rem; color:var(--muted);">
+                <span id="authToggleText">Don't have an account?</span>
+                <a href="#" onclick="toggleAuthMode()"
+                    style="color:var(--primary); font-weight:700; text-decoration:none;" id="authActionLink">Create
+                    One</a>
             </div>
+            <div style="margin-top:1.5rem; font-size:0.65rem; color:var(--muted); opacity:0.6;">POWERED BY CIPHERPROXY
+                CORE</div>
         </div>
     </div>
 
     <div id="dashboard">
         <div class="sidebar">
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:3rem; padding-left:10px;">
-                <i class="fa-solid fa-shield-halved" style="color:var(--primary); font-size:2rem;"></i>
-                <h2 style="font-weight:900; letter-spacing:-1px; font-size:1.5rem;">HAL 4.0</h2>
+                <i class="fa-solid fa-user-shield" style="color:var(--primary); font-size:2rem;"></i>
+                <h2 style="font-weight:900; letter-spacing:-1px; font-size:1.5rem;">CipherProxy</h2>
             </div>
 
             <div class="nav-item active" onclick="go('home', this)"><i class="fa-solid fa-grid-2"></i> Dashboard</div>
@@ -388,8 +415,8 @@
                 </div>
                 <div style="text-align:right;">
                     <div id="uName"
-                        style="font-weight:800; font-family:'JetBrains Mono'; font-size:1.4rem; color:var(--primary);">
-                        ADMIN_001</div>
+                        style="font-weight:800; font-family:'JetBrains Mono'; font-size:1.4rem; color:var(--primary); text-transform:uppercase;">
+                        OPERATOR_SECURE</div>
                     <div
                         style="color:var(--accent); font-size:0.7rem; font-weight:800; display:flex; align-items:center; gap:8px; justify-content:flex-end; margin-top:5px;">
                         <i class="fa-solid fa-circle-check"></i> AES-256 / SHA-256 TUNNEL ACTIVE
@@ -484,10 +511,19 @@
             <div id="anomaly" class="page">
                 <div style="display:grid; grid-template-columns: 1fr 2fr; gap:1.5rem; margin-bottom:1.5rem;">
                     <div class="card" style="text-align:center; padding:3rem;">
-                        <label>Threat Risk Index</label>
-                        <div id="riskVal" style="font-size:6rem; font-weight:900; color:var(--primary);">0</div>
-                        <p style="color:var(--muted); font-size:0.8rem; letter-spacing:2px;">MONITORING BEHAVIOR VECTORS
-                        </p>
+                        <label style="color:var(--text); opacity:0.6; font-size:0.9rem; font-weight:700;">THREAT RISK
+                            INDEX</label>
+                        <div id="riskVal"
+                            style="font-size:7rem; font-weight:900; color:#ef4444; text-shadow: 0 0 30px rgba(239, 68, 68, 0.4);">
+                            0</div>
+                        <div
+                            style="width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:10px; margin-top:1rem; overflow:hidden;">
+                            <div id="riskBar"
+                                style="width:0%; height:100%; background:linear-gradient(to right, #3b82f6, #ef4444); transition: 0.5s;">
+                            </div>
+                        </div>
+                        <p style="color:var(--muted); font-size:0.75rem; letter-spacing:2px; margin-top:1.5rem;">
+                            CONTINUOUS BEHAVIORAL ANALYSIS</p>
                     </div>
                     <div class="card" style="padding-bottom:1rem;">
                         <h4 style="margin-bottom:1rem;">Real-time Anomaly Matrix</h4>
@@ -585,7 +621,9 @@
     </div>
 
     <script>
-        const API = "http://127.0.0.1:8000";
+        // Deployment Config
+        const urlParams = new URLSearchParams(window.location.search);
+        const API = urlParams.get('api') || "https://cipherproxy-backend.onrender.com" || "http://127.0.0.1:8000";
         let TK = localStorage.getItem('hal4_tk');
         let chartH, chartA, chartP, chartR;
 
@@ -680,11 +718,13 @@
             fetch(`${API}/anomaly-report`, { headers: hdr() }).then(r => r.json()).then(d => {
                 const mainScore = Math.round(d.users[0]?.score || 0);
                 document.getElementById('riskVal').innerText = mainScore;
+                document.getElementById('riskBar').style.width = mainScore + '%';
+                document.getElementById('riskVal').style.color = mainScore > 70 ? '#ef4444' : (mainScore > 30 ? '#f59e0b' : '#3b82f6');
 
                 if (d.alerts.length > 0) {
-                    document.getElementById('alertBox').innerHTML = d.alerts.map(a => `<div style="background:rgba(239,68,68,0.1); border:1px solid var(--danger); padding:1rem; border-radius:12px; margin-bottom:0.8rem; font-size:0.8rem; border-left:4px solid var(--danger); animation:pulse 2s infinite;">${a}</div>`).join('');
+                    document.getElementById('alertBox').innerHTML = d.alerts.map(a => `<div style="background:rgba(239,68,68,0.1); border:1px solid var(--danger); padding:1rem; border-radius:12px; margin-bottom:0.8rem; font-size:0.8rem; border-left:4px solid var(--danger); animation:pulse 2s infinite; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1);">${a}</div>`).join('');
                 } else if (mainScore > 0) {
-                    document.getElementById('alertBox').innerHTML = `<div style="background:rgba(59,130,246,0.1); border:1px solid var(--primary); padding:1rem; border-radius:12px; margin-bottom:0.8rem; font-size:0.8rem; border-left:4px solid var(--primary);">SYSTEM_STABLE: Monitoring search intensity (${mainScore}%)</div>`;
+                    document.getElementById('alertBox').innerHTML = `<div style="background:rgba(59,130,246,0.1); border:1px solid var(--primary); padding:1rem; border-radius:12px; margin-bottom:0.8rem; font-size:0.8rem; border-left:4px solid var(--primary); color:#93c5fd;">SYSTEM_STABLE: Monitoring search intensity (${mainScore}%)</div>`;
                 }
 
                 // Update Radar Graph for Behavioral Vectors
@@ -833,10 +873,13 @@
                     datasets: [{
                         label: 'Behavioral Vectors',
                         data: [0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.3)',
                         borderColor: '#3b82f6',
-                        pointBackgroundColor: '#3b82f6',
-                        borderWidth: 2
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#3b82f6',
+                        pointRadius: 4,
+                        borderWidth: 3,
+                        fill: true
                     }]
                 },
                 options: {
@@ -845,10 +888,10 @@
                     plugins: { legend: { display: false } },
                     scales: {
                         r: {
-                            angleLines: { color: 'rgba(255,255,255,0.1)' },
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            pointLabels: { color: '#94a3b8', font: { size: 10 } },
-                            ticks: { display: false },
+                            angleLines: { color: 'rgba(255,255,255,0.15)' },
+                            grid: { color: 'rgba(255,255,255,0.15)' },
+                            pointLabels: { color: '#e2e8f0', font: { size: 11, weight: 'bold' } },
+                            ticks: { display: false, stepSize: 20 },
                             suggestedMin: 0,
                             suggestedMax: 100
                         }
@@ -884,17 +927,48 @@
             loadPerf();
         }
 
-        function doLogin(e) {
+        let isRegister = false;
+        function toggleAuthMode() {
+            isRegister = !isRegister;
+            document.getElementById('registerFields').style.display = isRegister ? 'block' : 'none';
+            document.getElementById('authTitle').innerText = isRegister ? 'Join CipherProxy' : 'CipherProxy';
+            document.getElementById('authDesc').innerText = isRegister ? 'Create your secure identity' : 'Enterprise Privacy Engine';
+            document.getElementById('authBtn').innerText = isRegister ? 'CREATE ACCOUNT' : 'INITIALIZE SESSION';
+            document.getElementById('idLabel').innerText = isRegister ? 'Username' : 'Identity (Username or Email)';
+            document.getElementById('authToggleText').innerText = isRegister ? 'Already have an account?' : "Don't have an account?";
+            document.getElementById('authActionLink').innerText = isRegister ? 'Log In' : 'Create One';
+        }
+
+        function handleAuth(e) {
             e.preventDefault();
+            if (isRegister) doRegister(); else doLogin();
+        }
+
+        function doRegister() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const user = document.getElementById('userIn').value;
+            const pass = document.getElementById('passIn').value;
+
+            fetch(`${API}/register?full_name=${name}&email=${email}&username=${user}&password=${pass}`, { method: 'POST' })
+                .then(r => r.json()).then(d => {
+                    if (d.status === 'success') {
+                        alert("Account created! You can now log in.");
+                        toggleAuthMode();
+                    } else { alert(d.detail || "Registration failed."); }
+                });
+        }
+
+        function doLogin() {
             const user = document.getElementById('userIn').value;
             const pass = document.getElementById('passIn').value;
             const fd = new FormData(); fd.append('username', user); fd.append('password', pass);
             fetch(`${API}/login`, { method: 'POST', body: fd }).then(r => r.json()).then(d => {
                 if (d.access_token) {
                     localStorage.setItem('hal4_tk', d.access_token);
-                    localStorage.setItem('hal4_user', user);
+                    localStorage.setItem('hal4_user', d.user_display || user);
                     location.reload();
-                } else { alert("Access Denied."); }
+                } else { alert(d.detail || "Access Denied."); }
             });
         }
 
@@ -904,6 +978,7 @@
         if (TK) {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
+            document.getElementById('uName').innerText = localStorage.getItem('hal4_user');
             initCharts();
             loadStats();
             setInterval(loadStats, 5000);
