@@ -13,22 +13,23 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
-            --bg: #0b0d11;
-            --card: #151921;
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --primary: #3b82f6;
+            --bg: #050608;
+            --card: #0f1116;
+            --text: #f8fafc;
+            --muted: #64748b;
+            --primary: #00e5ff;
             --accent: #22c55e;
             --warning: #f59e0b;
-            --danger: #ef4444;
+            --danger: #ff0055;
             --border: #1e293b;
-            --side: #0f172a;
+            --side: #0a0c10;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -36,11 +37,12 @@
             background: var(--bg);
             color: var(--text);
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
         #dashboard {
             display: none;
-            display: flex;
+            flex-direction: row;
         }
 
         .sidebar {
@@ -52,7 +54,87 @@
             display: flex;
             flex-direction: column;
             position: fixed;
-            transition: 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 2rem 0.5rem;
+            }
+
+            .sidebar h2,
+            .sidebar .nav-item span {
+                display: none;
+            }
+
+            .sidebar .nav-item {
+                justify-content: center;
+            }
+
+            .main {
+                margin-left: 80px;
+                width: calc(100% - 80px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+                z-index: 5000;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+                display: flex !important;
+            }
+
+            .sidebar.mobile-open .nav-item span,
+            .sidebar.mobile-open h2 {
+                display: block;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+
+            .search-area {
+                padding: 1rem;
+            }
+
+            #home>div,
+            #anomaly>div {
+                grid-template-columns: 1fr !important;
+            }
+
+            .mobile-toggle {
+                display: block !important;
+            }
+        }
+
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3);
+            font-size: 1.5rem;
         }
 
         .nav-item {
@@ -288,20 +370,45 @@
             }
         }
 
-        .btn-glow {
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             background: var(--primary);
-            color: white;
+            color: #000;
             border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 700;
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.3);
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: 0.3s;
         }
 
-        .btn-glow:hover {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-            transform: scale(1.02);
+        #glitchCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: #000;
+        }
+
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(30, 58, 138, 0.2), rgba(5, 6, 8, 0.9));
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
         }
     </style>
 </head>
@@ -316,16 +423,19 @@
         <button onclick="location.reload()" class="btn-glow" style="margin-top:20px;">RE-AUTHENTICATE</button>
     </div>
 
-    <div id="loginPage"
-        style="display:flex; align-items:center; justify-content:center; height:100vh; background: radial-gradient(circle at center, #1e3a8a, #0b0d11);">
+    <canvas id="glitchCanvas"></canvas>
+
+    <div id="loginPage" class="login-overlay" style="display:flex;">
         <div
-            style="background: var(--card); padding: 3rem; border-radius: 30px; width: 450px; border: 1px solid var(--border); text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-            <div style="font-size:3.5rem; color:var(--primary); margin-bottom:1rem;"><i
-                    class="fa-solid fa-user-shield"></i>
+            style="background: rgba(15, 17, 22, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 3rem; border-radius: 30px; width: 100%; max-width: 450px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.8); position: relative; z-index: 10;">
+            <div
+                style="font-size:3.5rem; color:var(--primary); margin-bottom:1rem; text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);">
+                <i class="fa-solid fa-user-shield"></i>
             </div>
-            <h1 style="font-weight:900; letter-spacing:-1px; font-size:2rem;" id="authTitle">CipherProxy</h1>
-            <p style="color:var(--muted); margin-bottom:2rem; font-size:0.85rem;" id="authDesc">Enterprise Privacy
-                Engine</p>
+            <h1 style="font-weight:900; letter-spacing:-1px; font-size:2.5rem; color: #fff;">CipherProxy</h1>
+            <p
+                style="color:var(--muted); margin-bottom:2rem; font-size:0.9rem; letter-spacing: 2px; text-transform: uppercase;">
+                Enterprise Privacy Engine</p>
 
             <form id="authForm" onsubmit="handleAuth(event)">
                 <div id="registerFields" style="display:none;">
@@ -334,14 +444,14 @@
                             style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Full
                             Name</label>
                         <input type="text" id="regName" placeholder="e.g. John Doe"
-                            style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                            style="width: 100%; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: #fff; border-radius: 14px; margin-top:5px; outline: none; transition: 0.3s; color-scheme: dark; border-left: 3px solid var(--primary);">
                     </div>
                     <div style="text-align:left; margin-bottom:1rem;">
                         <label
                             style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Email
                             Address</label>
                         <input type="email" id="regEmail" placeholder="e.g. user@hal.com"
-                            style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                            style="width: 100%; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: #fff; border-radius: 14px; margin-top:5px; outline: none; transition: 0.3s; color-scheme: dark; border-left: 3px solid var(--primary);">
                     </div>
                 </div>
 
@@ -350,30 +460,33 @@
                         style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Identity
                         (Username or Email)</label>
                     <input type="text" id="userIn" placeholder="e.g. admin@hal.com"
-                        style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                        style="width: 100%; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: #fff; border-radius: 14px; margin-top:5px; outline: none; transition: 0.3s; color-scheme: dark; border-left: 3px solid var(--primary);">
                 </div>
                 <div style="text-align:left; margin-bottom:1.5rem;">
                     <label
                         style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Access
                         Key</label>
                     <input type="password" id="passIn" placeholder="••••••••"
-                        style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                        style="width: 100%; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: #fff; border-radius: 14px; margin-top:5px; outline: none; transition: 0.3s; color-scheme: dark; border-left: 3px solid var(--primary);">
                 </div>
-                <button class="btn-glow" style="width:100%; padding:16px;" id="authBtn">INITIALIZE SESSION</button>
+                <button class="btn-glow" style="width:100%; padding:18px; font-weight:900;" id="authBtn">INITIALIZE
+                    SESSION</button>
             </form>
 
-            <div style="margin-top:1.5rem; font-size:0.85rem; color:var(--muted);">
+            <div style="margin-top:1.5rem; font-size:0.9rem; color:var(--muted);">
                 <span id="authToggleText">Don't have an account?</span>
                 <a href="#" onclick="toggleAuthMode()"
                     style="color:var(--primary); font-weight:700; text-decoration:none;" id="authActionLink">Create
                     One</a>
             </div>
-            <div style="margin-top:1.5rem; font-size:0.65rem; color:var(--muted); opacity:0.6;">POWERED BY CIPHERPROXY
-                CORE</div>
+            <div style="margin-top:2rem; font-size:0.6rem; color:var(--muted); opacity:0.3; letter-spacing:4px;">SECURED
+                VIA AES-256 + HMAC-SHA256</div>
         </div>
     </div>
+    </div>
+    </div>
 
-    <div id="dashboard">
+    <div id="dashboard" style="display:none;">
         <div class="sidebar">
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:3rem; padding-left:10px;">
                 <i class="fa-solid fa-user-shield" style="color:var(--primary); font-size:2rem;"></i>
@@ -649,6 +762,68 @@
         };
         probeBackends();
 
+        // --- LETTER GLITCH COMPONENT (VANILLA JS PORT) ---
+        class LetterGlitch {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                if (!this.canvas) return;
+                this.ctx = this.canvas.getContext('2d');
+                this.colors = ['#2b4539', '#61dca3', '#61b3dc', '#00e5ff', '#ff0055'];
+                this.chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789'.split('');
+                this.fontSize = 16;
+                this.charW = 12;
+                this.charH = 22;
+                this.grid = { cols: 0, rows: 0 };
+                this.letters = [];
+                this.lastUpdate = Date.now();
+                window.addEventListener('resize', () => this.init());
+                this.init();
+                this.animate();
+            }
+            init() {
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                this.canvas.width = rect.width * dpr;
+                this.canvas.height = rect.height * dpr;
+                this.canvas.style.width = rect.width + 'px';
+                this.canvas.style.height = rect.height + 'px';
+                this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                this.grid.cols = Math.ceil(rect.width / this.charW);
+                this.grid.rows = Math.ceil(rect.height / this.charH);
+                this.letters = Array.from({ length: this.grid.cols * this.grid.rows }, () => ({
+                    char: this.chars[Math.floor(Math.random() * this.chars.length)],
+                    color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                    opacity: 0.1 + Math.random() * 0.4
+                }));
+            }
+            animate() {
+                const now = Date.now();
+                if (now - this.lastUpdate > 60) {
+                    const count = Math.floor(this.letters.length * 0.05);
+                    for (let i = 0; i < count; i++) {
+                        const idx = Math.floor(Math.random() * this.letters.length);
+                        this.letters[idx].char = this.chars[Math.floor(Math.random() * this.chars.length)];
+                        this.letters[idx].opacity = 0.1 + Math.random() * 0.4;
+                    }
+                    this.draw();
+                    this.lastUpdate = now;
+                }
+                requestAnimationFrame(() => this.animate());
+            }
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width / window.devicePixelRatio, this.canvas.height / window.devicePixelRatio);
+                this.ctx.font = `${this.fontSize}px monospace`;
+                this.ctx.textBaseline = 'top';
+                this.letters.forEach((l, i) => {
+                    const x = (i % this.grid.cols) * this.charW;
+                    const y = Math.floor(i / this.grid.cols) * this.charH;
+                    this.ctx.fillStyle = l.color;
+                    this.ctx.globalAlpha = l.opacity;
+                    this.ctx.fillText(l.char, x, y);
+                });
+            }
+        }
+
         let TK = localStorage.getItem('hal4_tk');
         let chartH, chartA, chartP, chartR;
 
@@ -671,7 +846,7 @@
         function mask(s) { if (!s || s === "[HIDDEN]" || s === "[ENCRYPTED]") return s; return s.substring(0, 4) + "••••••••"; }
 
         function doSearch(val) {
-            if (val.length < 3) { document.getElementById('tokenViz').style.display = 'none'; return; }
+            if (val.length < 2) { document.getElementById('tokenViz').style.display = 'none'; return; }
             const viz = document.getElementById('tokenViz');
             viz.style.display = 'block';
             viz.innerHTML = `<span style="color:var(--primary);">[KMS]</span> Initializing Blind Search Tunnel...<br>`;
@@ -841,8 +1016,8 @@
 
             const cHome = document.getElementById('chartHome').getContext('2d');
             const gradBlue = cHome.createLinearGradient(0, 0, 0, 400);
-            gradBlue.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
-            gradBlue.addColorStop(1, 'rgba(59, 130, 246, 0)');
+            gradBlue.addColorStop(0, 'rgba(0, 229, 255, 0.6)');
+            gradBlue.addColorStop(1, 'rgba(0, 229, 255, 0)');
 
             chartH = new Chart(cHome, {
                 type: 'line',
@@ -850,14 +1025,17 @@
                     labels: ['T-10m', 'T-8m', 'T-6m', 'T-4m', 'T-2m', 'LIVE'],
                     datasets: [{
                         label: 'Secure Queries',
-                        data: [65, 82, 45, 110, 88, 142],
-                        borderColor: '#3b82f6',
+                        data: [120, 150, 80, 200, 140, 280],
+                        borderColor: '#00e5ff',
                         backgroundColor: gradBlue,
-                        tension: 0.4,
+                        tension: 0.5,
                         fill: true,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        borderWidth: 3
+                        pointRadius: 6,
+                        pointBackgroundColor: '#00e5ff',
+                        pointBorderColor: '#fff',
+                        borderWidth: 5,
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 229, 255, 0.5)'
                     }]
                 },
                 options: {
@@ -865,20 +1043,24 @@
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } },
-                        x: { grid: { display: false } }
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            border: { display: false },
+                            ticks: { font: { weight: 'bold', size: 10 } }
+                        },
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } }
                     }
                 }
             });
 
             const cAnom = document.getElementById('chartAnomaly').getContext('2d');
             const gradBar = cAnom.createLinearGradient(0, 0, 0, 300);
-            gradBar.addColorStop(0, '#3b82f6');
-            gradBar.addColorStop(1, '#1d4ed8');
+            gradBar.addColorStop(0, '#ff0055');
+            gradBar.addColorStop(1, '#670022');
 
             chartA = new Chart(cAnom, {
                 type: 'bar',
-                data: { labels: [], datasets: [{ label: 'Search Intensity', data: [], backgroundColor: gradBar, borderRadius: 8 }] },
+                data: { labels: [], datasets: [{ label: 'Search Intensity', data: [], backgroundColor: gradBar, borderRadius: 12 }] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -891,18 +1073,22 @@
             });
 
             const cRadar = document.getElementById('chartAnomalyRadar').getContext('2d');
+            const gradRadar = cRadar.createRadialGradient(150, 150, 0, 150, 150, 150);
+            gradRadar.addColorStop(0, 'rgba(0, 229, 255, 0.5)');
+            gradRadar.addColorStop(1, 'rgba(255, 0, 85, 0.1)');
+
             chartR = new Chart(cRadar, {
                 type: 'radar',
                 data: {
                     labels: ['Intensity', 'Entropy', 'Frequency', 'Pattern', 'Risk'],
                     datasets: [{
                         label: 'Behavioral Vectors',
-                        data: [0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(59, 130, 246, 0.3)',
-                        borderColor: '#3b82f6',
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#3b82f6',
-                        pointRadius: 4,
+                        data: [60, 40, 80, 20, 50],
+                        backgroundColor: 'rgba(0, 229, 255, 0.2)',
+                        borderColor: '#00e5ff',
+                        pointBackgroundColor: '#ff0055',
+                        pointBorderColor: '#fff',
+                        pointRadius: 5,
                         borderWidth: 3,
                         fill: true
                     }]
@@ -930,19 +1116,26 @@
                 data: {
                     labels: [],
                     datasets: [
-                        { label: 'Encryption (ms)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true, borderWidth: 2 },
-                        { label: 'Token Gen (ms)', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.4, fill: true, borderWidth: 2 }
+                        { label: 'Encryption (ms)', data: [], borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', tension: 0.5, fill: true, borderWidth: 3, pointRadius: 0 },
+                        { label: 'Token Gen (ms)', data: [], borderColor: '#ff0055', backgroundColor: 'rgba(255, 0, 85, 0.1)', tension: 0.5, fill: true, borderWidth: 3, pointRadius: 0 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'top', align: 'end', labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'circle' } }
+                        legend: { position: 'top', align: 'end', labels: { boxWidth: 10, usePointStyle: true, color: '#f8fafc', font: { weight: 'bold' } } }
                     },
                     scales: {
-                        y: { beginAtZero: false, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        x: { grid: { display: false } }
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#64748b' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b' }
+                        }
                     }
                 }
             });
@@ -1029,7 +1222,16 @@
             setInterval(loadStats, 5000);
             setInterval(() => { if (document.getElementById('anomaly').classList.contains('active')) loadAnomaly(); }, 3000);
             setInterval(() => { if (document.getElementById('perf').classList.contains('active')) loadPerf(); }, 3000);
+        } else {
+            new LetterGlitch('glitchBg');
         }
+
+        // Ensure prompt logic works for API stability
+        window.addEventListener('load', () => {
+            if (!TK && !localStorage.getItem('hal4_api_override')) {
+                console.log("Discovery phase starting...");
+            }
+        });
     </script>
 </body>
 

@@ -80,10 +80,12 @@ def generate_prefixes(text: str):
         for i in range(3, min(len(clean), 15)):
             tokens.append(generate_search_token(clean[:i]))
             
-    # Phonetic tokens for name variation handling
+    # Word-based tokens (fixes searching for 'Doe' in 'John Doe')
     words = clean.split()
     for word in words:
         if len(word) > 2:
+            tokens.append(generate_search_token(word))
+            # Suffixes/Wait, let's stick to word exacts + phonetic
             soundex = phonetic_encode(word)
             tokens.append(generate_search_token("PHONETIC_" + soundex))
             
