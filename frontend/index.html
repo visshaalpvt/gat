@@ -625,11 +625,7 @@
         const getBaseAPI = () => {
             const host = window.location.hostname;
             if (host === 'localhost' || host === '127.0.0.1') return "http://127.0.0.1:8000";
-
-            // Try to derive the Render URL from Vercel URL
-            // e.g., gat-beta.vercel.app -> gat.onrender.com
-            const base = host.split('.')[0].replace('-beta', '').replace('-frontend', '').replace('-ui', '');
-            return `https://${base}.onrender.com`;
+            return "https://cipherproxy-backend.onrender.com";
         };
 
         const CURRENT_API = getBaseAPI();
@@ -993,7 +989,7 @@
                 })
                 .catch(err => {
                     console.error("Login Error:", err);
-                    alert(`SYSTEM_OFFLINE: Could not reach Security Backend at ${CURRENT_API}\n\n1. Ensure your Render service name is correct.\n2. Wait 60s for Render to wake up from its cold-start.\n3. Try again in a minute.`);
+                    alert(`SYSTEM_OFFLINE: Could not reach Security Backend at ${CURRENT_API}\n\n1. Wait 60s for Render to wake up (Cold Start).\n2. Try again in a minute.`);
                 });
         }
 
