@@ -22,17 +22,25 @@ def generate_10k_records():
     
     banks = ["Global Bank Corp", "Swift Reserve", "Vertex Trust", "Apex Financials", "Zenith Banking"]
     
-    print("Generating 10,000 secure bank records...")
+    print("Generating 10,000 secure enterprise bank records (Committing every 100)...")
     
-    batch_size = 500
-    for i in range(20): # 20 * 500 = 10,000
-        records = []
+    batch_size = 100
+    for i in range(100): # 100 * 100 = 10,000
         for j in range(batch_size):
-            name = f"{random.choice(names)} {random.randint(100, 999)}"
+            raw_name = random.choice(names)
+            name = f"{raw_name} {random.randint(100, 9999)}"
             city = random.choice(cities)
             acc = f"{random.randint(1000, 9999)}-{random.randint(1000, 9999)}-{random.randint(1000, 9999)}"
             cust_id = f"CUST-{random.randint(100000, 999999)}"
             
+            # Additional Enterprise Data
+            phone = f"+91 {random.randint(7000, 9999)}{random.randint(100000, 999999)}"
+            pan = f"{''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ', k=5))}{random.randint(1000, 9999)}{random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')}"
+            aadhaar = f"{random.randint(1000, 9999)}-{random.randint(1000, 9999)}-{random.randint(1000, 9999)}"
+            email = f"{raw_name.lower().replace(' ', '')}{random.randint(10,999)}@banksecure.com"
+            risk = random.choice(["Low", "Medium", "High", "Critical"])
+            kyc = random.choice(["VERIFIED", "PENDING", "REJECTED"])
+
             # Encrypt
             rec = BankRecord(
                 customer_id=encrypt(cust_id),
@@ -41,20 +49,33 @@ def generate_10k_records():
                 bank_name=encrypt(random.choice(banks)),
                 branch=encrypt(f"{city} Central"),
                 city=encrypt(city),
-                balance=encrypt(str(random.randint(5000, 1000000)))
+                balance=encrypt(str(random.randint(5000, 1000000))),
+                pan=encrypt(pan),
+                aadhaar=encrypt(aadhaar),
+                phone=encrypt(phone),
+                email=encrypt(email),
+                risk_score_enc=encrypt(risk),
+                kyc_status_enc=encrypt(kyc)
             )
             db.add(rec)
             db.flush()
             
-            # Tokens
-            t_list = generate_prefixes(name) + generate_prefixes(acc) + generate_prefixes(city)
+            # Multi-Field Blind Indexing
+            t_list = generate_prefixes(name) + \
+                     generate_prefixes(city) + \
+                     generate_prefixes(phone) + \
+                     generate_prefixes(pan) + \
+                     generate_prefixes(aadhaar) + \
+                     generate_prefixes(acc)
+
             for t in set(t_list):
                 db.add(SearchToken(token=t, record_id=rec.id))
         
         db.commit()
-        print(f"Batch {i+1}/20 completed...")
+        if (i+1) % 5 == 0:
+            print(f"Progress: {(i+1) * batch_size} / 10,000 records completed...")
 
-    print("Success: 10,000 records encrypted and indexed.")
+    print("Success: 10,000 enterprise records encrypted and indexed.")
     db.close()
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HAL 4.0 — Unified Security Command Center</title>
+    <title>HAL 4.0 — Enterprise Banking Command Center</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
         rel="stylesheet">
@@ -38,7 +38,6 @@
             overflow-x: hidden;
         }
 
-        /* === SIDEBAR === */
         #dashboard {
             display: none;
             display: flex;
@@ -67,10 +66,11 @@
             align-items: center;
             gap: 12px;
             font-size: 0.85rem;
+            transition: 0.2s;
         }
 
         .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(59, 130, 246, 0.05);
             color: #fff;
         }
 
@@ -78,9 +78,10 @@
             background: rgba(59, 130, 246, 0.1);
             color: var(--primary);
             font-weight: 700;
+            border-left: 3px solid var(--primary);
+            border-radius: 0 12px 12px 0;
         }
 
-        /* === MAIN CONTENT === */
         .main {
             margin-left: 280px;
             width: calc(100% - 280px);
@@ -93,9 +94,9 @@
             border-radius: 20px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
+            position: relative;
         }
 
-        /* === STATS === */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -109,11 +110,17 @@
             padding: 1.5rem;
             border-radius: 20px;
             border-left: 4px solid var(--primary);
+            transition: 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
 
         .stat-card label {
             color: var(--muted);
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             font-weight: 800;
             display: block;
@@ -123,47 +130,23 @@
         .stat-card .val {
             font-size: 1.8rem;
             font-weight: 800;
+            font-family: 'JetBrains Mono';
         }
 
-        /* === COMPARISON BOX === */
-        .comparison-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .comp-box {
-            padding: 1.5rem;
-            border-radius: 16px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .comp-box.trad {
-            background: rgba(239, 68, 68, 0.05);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .comp-box.hal {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px solid var(--primary);
-        }
-
-        /* === SEARCH === */
+        /* === SEARCH & TOKEN VIZ === */
         .search-area {
-            background: linear-gradient(135deg, #1e3a8a, #0f172a);
+            background: linear-gradient(135deg, #1e3a8a, #0b0d11);
             padding: 3rem;
             border-radius: 24px;
             margin-bottom: 2rem;
-            position: relative;
+            border: 1px solid var(--border);
         }
 
         .search-area input {
             width: 100%;
-            padding: 18px 50px;
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
+            padding: 20px 60px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             color: #fff;
             font-size: 1.2rem;
@@ -173,52 +156,36 @@
 
         #tokenViz {
             margin-top: 1.5rem;
-            background: #0b0d11;
-            color: var(--accent);
-            padding: 1rem;
-            border-radius: 12px;
-            font-family: 'JetBrains Mono';
-            font-size: 0.8rem;
-            display: none;
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            white-space: pre-wrap;
-        }
-
-        /* === TERMINAL BREACH UI === */
-        .terminal {
             background: #000;
             color: #0f0;
-            font-family: 'JetBrains Mono', monospace;
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 12px;
-            border: 1px solid #040;
-            height: 60vh;
-            overflow-y: auto;
-            font-size: 0.9rem;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.1);
-        }
-
-        .term-row {
-            margin-bottom: 4px;
-            border-bottom: 1px solid #111;
-            padding-bottom: 2px;
-        }
-
-        /* === LOCKDOWN === */
-        #lockdown {
+            font-family: 'JetBrains Mono';
+            font-size: 0.85rem;
             display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(185, 28, 28, 0.98);
-            z-index: 9999;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: #fff;
+            border: 1px solid #040;
+            line-height: 1.6;
+        }
+
+        .cursor-blink {
+            border-right: 8px solid #0f0;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                border-color: transparent
+            }
         }
 
         /* === TABLE === */
+        .table-container {
+            overflow-x: auto;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -226,71 +193,114 @@
 
         th {
             text-align: left;
-            padding: 12px 1rem;
+            padding: 16px;
             color: var(--muted);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
+            letter-spacing: 1px;
             border-bottom: 1px solid var(--border);
         }
 
         td {
-            padding: 14px 1rem;
+            padding: 16px;
             border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .badge {
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 800;
             text-transform: uppercase;
         }
 
-        .badge-secure {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--accent);
+        .risk-high {
+            background: linear-gradient(to right, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
+            color: #ff6b6b;
+            border: 1px solid rgba(239, 68, 68, 0.4);
         }
 
-        /* === PAGES === */
+        .risk-medium {
+            background: linear-gradient(to right, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.05));
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .risk-low {
+            background: linear-gradient(to right, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05));
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .risk-critical {
+            background: linear-gradient(to right, #7f1d1d, #450a0a);
+            color: #fff;
+            border: 1px solid #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+        }
+
+        /* === TERMINAL === */
+        .terminal {
+            background: #000;
+            color: #0f0;
+            font-family: 'JetBrains Mono';
+            padding: 2rem;
+            border-radius: 16px;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            border: 1px solid #040;
+        }
+
+        #lockdown {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(239, 68, 68, 0.98);
+            z-index: 10000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+        }
+
         .page {
             display: none;
-            animation: fadeIn 0.3s;
+            animation: slideIn 0.4s ease-out;
         }
 
         .page.active {
             display: block;
         }
 
-        @keyframes fadeIn {
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateX(20px);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
             }
-        }
-
-        /* === BUTTONS === */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
         }
 
         .btn-glow {
             background: var(--primary);
             color: white;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
         .btn-glow:hover {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
             transform: scale(1.02);
         }
     </style>
@@ -298,274 +308,230 @@
 
 <body>
 
-    <!-- LOCKDOWN -->
     <div id="lockdown">
-        <i class="fa-solid fa-radiation fa-spin" style="font-size:8rem; margin-bottom:2rem;"></i>
-        <h1>SYSTEM_CRITICAL_LOCKDOWN</h1>
-        <p style="font-size:1.5rem; margin-top:1rem;">UNAUTHORIZED HONEYTOKEN ACCESS ATTEMPTED / BLACKCHAIN LOGGED</p>
-        <button onclick="location.reload()" class="btn btn-glow" style="margin-top:40px;">RE-VERIFY IDENTITY</button>
+        <i class="fa-solid fa-shield-virus fa-beat" style="font-size:8rem; margin-bottom:2rem;"></i>
+        <h1 style="font-size:3rem; font-weight:900;">SYSTEM_LOCKDOWN_ACTIVE</h1>
+        <p style="font-size:1.5rem; margin:1rem 0;">HONEYTOKEN TRAPDOOR TRIGGERED BY USER: <span id="badUser"></span>
+        </p>
+        <button onclick="location.reload()" class="btn-glow" style="margin-top:20px;">RE-AUTHENTICATE</button>
     </div>
 
-    <!-- LOGIN -->
     <div id="loginPage"
-        style="display: flex; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle at center, #1e3a8a, #0b0d11);">
+        style="display:flex; align-items:center; justify-content:center; height:100vh; background: radial-gradient(circle at center, #1e3a8a, #0b0d11);">
         <div
-            style="background: var(--card); padding: 3rem; border-radius: 24px; width: 440px; border: 1px solid var(--border); text-align: center;">
-            <div style="font-size:3rem; color:var(--primary); margin-bottom:1rem;"><i
-                    class="fa-solid fa-shield-halved"></i></div>
-            <h1 style="font-size:1.8rem; font-weight:800;">HAL 4.0</h1>
-            <p style="color:var(--muted); margin-bottom:2rem;">Secure Search Intelligence Platform</p>
+            style="background: var(--card); padding: 4rem; border-radius: 30px; width: 450px; border: 1px solid var(--border); text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <div style="font-size:4rem; color:var(--primary); margin-bottom:1.5rem;"><i class="fa-solid fa-vault"></i>
+            </div>
+            <h1 style="font-weight:900; letter-spacing:-1px;">HAL 4.0</h1>
+            <p style="color:var(--muted); margin-bottom:2.5rem; font-size:0.9rem;">Enterprise Banking Command & Control
+            </p>
             <form onsubmit="doLogin(event)">
-                <input type="text" id="userIn" placeholder="Identity (admin / manager_k / clerk_j)" value="admin"
-                    style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-bottom: 1rem; outline: none;">
-                <input type="password" id="passIn" placeholder="Access Key" value="admin123"
-                    style="width: 100%; padding: 14px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-bottom: 1rem; outline: none;">
-                <button class="btn btn-glow" style="width:100%;">AUTHENTICATE</button>
+                <div style="text-align:left; margin-bottom:1rem;">
+                    <label
+                        style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Identity</label>
+                    <input type="text" id="userIn" placeholder="e.g. admin" value="admin"
+                        style="width: 100%; padding: 16px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                </div>
+                <div style="text-align:left; margin-bottom:2rem;">
+                    <label
+                        style="font-size:0.7rem; color:var(--muted); font-weight:800; text-transform:uppercase;">Access
+                        Key</label>
+                    <input type="password" id="passIn" placeholder="••••••••" value="admin123"
+                        style="width: 100%; padding: 16px; background: #0b0d11; border: 1px solid var(--border); color: #fff; border-radius: 12px; margin-top:5px; outline: none; border-left: 3px solid var(--primary);">
+                </div>
+                <button class="btn-glow" style="width:100%; padding:18px;">INITIALIZE SESSION</button>
             </form>
+            <div style="margin-top:2rem; font-size:0.7rem; color:var(--muted);">ROLES: admin, analyst, auditor, officer
+            </div>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
     <div id="dashboard">
         <div class="sidebar">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:2rem;">
-                <i class="fa-solid fa-shield-halved" style="color:var(--primary); font-size:1.5rem;"></i>
-                <h2 style="font-weight:800; font-size:1.2rem;">HAL 4.0</h2>
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:3rem; padding-left:10px;">
+                <i class="fa-solid fa-shield-halved" style="color:var(--primary); font-size:2rem;"></i>
+                <h2 style="font-weight:900; letter-spacing:-1px; font-size:1.5rem;">HAL 4.0</h2>
             </div>
 
-            <div class="nav-item active" onclick="go('home', this)"><i class="fa-solid fa-gauge-high"></i> Dashboard
-            </div>
+            <div class="nav-item active" onclick="go('home', this)"><i class="fa-solid fa-grid-2"></i> Dashboard</div>
             <div class="nav-item" onclick="go('search', this)"><i class="fa-solid fa-magnifying-glass"></i> Secure
                 Search</div>
-            <div class="nav-item" onclick="document.getElementById('csvIn').click()"><i class="fa-solid fa-upload"></i>
-                Upload Dataset</div>
-
-            <div
-                style="margin: 0.8rem 0; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--border);">
-                <label
-                    style="font-size: 0.6rem; color: var(--muted); text-transform: uppercase; font-weight: 800; display:block; margin-bottom:6px;">Operation
-                    Mode</label>
-                <select id="caseMode" onchange="updateCase()"
-                    style="width: 100%; background: #0b0d11; color: #fff; border: 1px solid var(--border); padding: 8px; border-radius: 8px; outline: none; font-size: 0.75rem;">
-                    <option value="fraud">Fraud Detection</option>
-                    <option value="kyc">KYC Verification</option>
-                    <option value="dup">Duplicate Identity Check</option>
-                </select>
+            <div class="nav-item" onclick="document.getElementById('csvIn').click()"><i
+                    class="fa-solid fa-cloud-arrow-up"></i> Upload Dataset</div>
+            <div class="nav-item" onclick="go('anomaly', this)"><i class="fa-solid fa-chart-line"></i> Anomaly Detection
             </div>
-
-            <div class="nav-item" onclick="go('anomaly', this)"><i class="fa-solid fa-triangle-exclamation"></i> Anomaly
-                Detection</div>
-            <div class="nav-item" onclick="go('chain', this)"><i class="fa-solid fa-link"></i> Tamper Detection</div>
-            <div class="nav-item" onclick="go('audit', this)"><i class="fa-solid fa-list-check"></i> Audit Logs</div>
-            <div class="nav-item" onclick="go('perf', this)"><i class="fa-solid fa-chart-line"></i> Performance</div>
-            <div class="nav-item" onclick="go('breach', this)"><i class="fa-solid fa-skull-crossbones"
-                    style="color:var(--danger);"></i> Breach Simulation</div>
+            <div class="nav-item" onclick="go('tamper', this)"><i class="fa-solid fa-microchip"></i> Tamper Detection
+            </div>
+            <div class="nav-item" onclick="go('audit', this)"><i class="fa-solid fa-clipboard-list"></i> Audit Logs
+            </div>
+            <div class="nav-item" onclick="go('perf', this)"><i class="fa-solid fa-gauge-high"></i> Performance</div>
+            <div class="nav-item" onclick="go('breach', this)"><i class="fa-solid fa-user-secret"></i> Breach Simulation
+            </div>
 
             <input type="file" id="csvIn" hidden accept=".csv" onchange="uploadCSV(this)">
 
-            <div style="margin-top:auto;">
+            <div style="margin-top:auto; background: rgba(255,255,255,0.03); padding:1rem; border-radius:16px;">
                 <div id="roleBadge" class="badge"
-                    style="margin-bottom:1rem; display:block; text-align:center; background:rgba(59,130,246,0.1); border:1px solid var(--primary); padding:8px;">
-                    ROLE: ADMIN</div>
-                <div class="nav-item" onclick="logout()" style="color:var(--danger);"><i
-                        class="fa-solid fa-power-off"></i> Sign Out</div>
+                    style="background:var(--primary); display:block; text-align:center; padding:8px; margin-bottom:1rem;">
+                    SUPER ADMIN</div>
+                <div class="nav-item" onclick="logout()" style="color:var(--danger); padding:0; margin:0;"><i
+                        class="fa-solid fa-sign-out-alt"></i> End Session</div>
             </div>
         </div>
 
         <div class="main">
-            <!-- HEADER -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
                 <div>
-                    <h1 id="pgTitle" style="font-size:1.8rem; font-weight:800; letter-spacing:-0.5px;">Dashboard</h1>
-                    <p id="pgSub" style="color:var(--muted); font-size:0.9rem;">Zero-Plaintext Search Intelligence</p>
+                    <h1 id="pgTitle" style="font-size:2.4rem; font-weight:900;">System Overview</h1>
+                    <p style="color:var(--muted); font-size:0.9rem;">Enterprise Banking Searchable Encryption (KMS
+                        ACTIVE)</p>
                 </div>
                 <div style="text-align:right;">
                     <div id="uName"
-                        style="font-weight:700; font-family:'JetBrains Mono'; font-size:1.1rem; color:var(--primary);">
+                        style="font-weight:800; font-family:'JetBrains Mono'; font-size:1.4rem; color:var(--primary);">
                         ADMIN_001</div>
                     <div
-                        style="color:var(--accent); font-size:0.65rem; font-weight:800; letter-spacing:1px; margin-top:4px;">
-                        <i class="fa-solid fa-circle" style="font-size:6px; vertical-align:middle;"></i>
-                        ENCRYPTION_ACTIVE
+                        style="color:var(--accent); font-size:0.7rem; font-weight:800; display:flex; align-items:center; gap:8px; justify-content:flex-end; margin-top:5px;">
+                        <i class="fa-solid fa-circle-check"></i> AES-256 / SHA-256 TUNNEL ACTIVE
                     </div>
                 </div>
             </div>
 
             <div class="stats-grid">
-                <div class="stat-card"><label>Encrypted Records</label>
-                    <div class="val" id="sRec">10,000</div>
+                <div class="stat-card"><label>Total Identities</label>
+                    <div class="val" id="sRec">0</div>
                 </div>
-                <div class="stat-card"><label>Search Tokens</label>
-                    <div class="val" id="sTok">287,253</div>
+                <div class="stat-card"><label>Encrypted Tokens</label>
+                    <div class="val" id="sTok">0</div>
                 </div>
-                <div class="stat-card" style="border-left-color:var(--warning);"><label>Blockchain Blocks</label>
-                    <div class="val" id="sBlk">41</div>
+                <div class="stat-card" style="border-left-color:var(--warning);"><label>Blockchain Height</label>
+                    <div class="val" id="sBlk">0</div>
                 </div>
-                <div class="stat-card" style="border-left-color:var(--accent);"><label>Audit Events</label>
-                    <div class="val" id="sAud">41</div>
+                <div class="stat-card" style="border-left-color:var(--accent);"><label>Verified Logs</label>
+                    <div class="val" id="sAud">0</div>
                 </div>
             </div>
 
-            <!-- HOME -->
+            <!-- PAGES -->
             <div id="home" class="page active">
-                <div class="card" style="background:#1a202c; border:none; padding:2rem;">
-                    <h3 style="margin-bottom:1rem; display:flex; gap:10px; align-items:center;"><i
-                            class="fa-solid fa-circle-nodes" style="color:var(--primary);"></i> PS: Secured String
-                        Matching using Searchable Encryption</h3>
-                    <p style="color:var(--muted); font-size:0.9rem; line-height:1.6; margin-bottom:1.5rem;">Core
-                        Innovation: Enable privacy-preserving search over encrypted databases. Data stays fully
-                        encrypted at all times. Server never sees plaintext — not during storage, not during search.</p>
-
-                    <div class="comparison-container">
-                        <div class="comp-box trad">
-                            <span class="badge"
-                                style="background:var(--danger); margin-bottom:10px; display:inline-block;">Traditional</span>
-                            <p style="font-size:0.8rem;">Data decrypted for search. Plaintext exposed in RAM/Logs.</p>
-                        </div>
-                        <div class="comp-box hal">
-                            <span class="badge"
-                                style="background:var(--primary); margin-bottom:10px; display:inline-block;">HAL
-                                4.0</span>
-                            <p style="font-size:0.8rem;">Token-matching on ciphertext. Zero plaintext exposure.</p>
-                        </div>
-                    </div>
+                <div class="card"
+                    style="background: linear-gradient(135deg, #1e3a8a, #0b0d11); border:none; padding:2.5rem;">
+                    <h2 style="margin-bottom:1rem;">Zero-Plaintext Search Intelligence</h2>
+                    <p style="color:rgba(255,255,255,0.7); max-width:800px; line-height:1.7;">State-of-the-art
+                        multi-dimensional searching over encrypted banking records. Every byte in the database is an
+                        AESnd is 100% blind to your plaintext queries.</p>
                 </div>
-
-                <div style="display:grid; grid-template-columns: 1.8fr 1fr; gap:1.5rem;">
+                <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem;">
                     <div class="card">
-                        <div
-                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                            <h4>Activity (Real-Time)</h4>
-                            <div class="badge" style="background:rgba(59,130,246,0.1); color:var(--primary);">Live Feed
-                            </div>
-                        </div>
-                        <div style="height:280px;"><canvas id="chartFreqHome"></canvas></div>
+                        <h4 style="margin-bottom:1rem;">Search Frequency (Live)</h4>
+                        <div style="height:320px;"><canvas id="chartHome"></canvas></div>
                     </div>
                     <div class="card">
-                        <h4>Security Architecture</h4>
-                        <div style="margin-top:1.5rem; display:grid; gap:1.2rem;">
-                            <div style="display:flex; gap:12px; align-items:center;"><i class="fa-solid fa-lock"
-                                    style="color:var(--primary);"></i>
-                                <div style="font-size:0.85rem;"><b>Storage:</b> AES-256-CBC</div>
+                        <h4 style="margin-bottom:1.5rem;">Security Protocol Status</h4>
+                        <div style="display:grid; gap:1.5rem;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                                <span>AES-256-CBC</span><span style="color:var(--accent);">ENABLED</span>
                             </div>
-                            <div style="display:flex; gap:12px; align-items:center;"><i
-                                    class="fa-solid fa-magnifying-glass-shield" style="color:var(--accent);"></i>
-                                <div style="font-size:0.85rem;"><b>Search:</b> HMAC-SHA256 Blind Index</div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                                <span>HMAC-SHA256 Indices</span><span style="color:var(--accent);">ACTIVE</span>
                             </div>
-                            <div style="display:flex; gap:12px; align-items:center;"><i class="fa-solid fa-link"
-                                    style="color:var(--warning);"></i>
-                                <div style="font-size:0.85rem;"><b>Integrity:</b> Blockchain Hash Chain</div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:1rem;"><span>Phonetic
+                                    Soundex</span><span style="color:var(--accent);">STANDBY</span></div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem;">
+                                <span>Honeytoken Traps</span><span style="color:var(--warning);">ARMED</span>
                             </div>
-                            <div style="display:flex; gap:12px; align-items:center;"><i class="fa-solid fa-id-card"
-                                    style="color:var(--primary);"></i>
-                                <div style="font-size:0.85rem;"><b>Auth:</b> JWT Tokenized RBAC</div>
-                            </div>
+
+                            <button onclick="doSearch('admin_root')" class="btn-glow"
+                                style="background:var(--danger); font-size:0.7rem; padding:10px;">
+                                <i class="fa-solid fa-bomb"></i> TRIGGER TRAPDOOR TEST
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- SEARCH -->
             <div id="search" class="page">
                 <div class="search-area">
-                    <i class="fa-solid fa-magnifying-glass"
-                        style="position:absolute; left:50px; top:54px; color:rgba(255,255,255,0.4); font-size:1.5rem;"></i>
-                    <input id="qIn" placeholder="Search Encrypted records (e.g. Rahul, John, Chennai...)"
-                        onkeyup="search(this.value)">
+                    <i class="fa-solid fa-search"
+                        style="position:absolute; left:60px; top:54px; color:rgba(255,255,255,0.4); font-size:1.8rem;"></i>
+                    <input id="qIn" placeholder="Search Names, Phone, IFSC, or KYC IDs..."
+                        onkeyup="doSearch(this.value)">
                     <div id="tokenViz"></div>
                 </div>
-                <div class="card" style="padding:0; overflow:hidden;">
+                <div class="table-container">
                     <table id="resTable">
                         <thead>
                             <tr>
-                                <th>#ID</th>
-                                <th>Customer Name</th>
-                                <th>Account</th>
+                                <th>ID</th>
+                                <th>Customer Profile</th>
+                                <th>Account Details</th>
                                 <th>Location</th>
-                                <th>Encryption</th>
+                                <th>Risk</th>
+                                <th>Match Intelligence</th>
                             </tr>
                         </thead>
                         <tbody id="resBody">
                             <tr>
-                                <td colspan="5" style="text-align:center; padding:3rem; color:var(--muted);">Initiate
-                                    secure query...</td>
+                                <td colspan="6"
+                                    style="text-align:center; padding:4rem; color:var(--muted); font-size:1.2rem;">
+                                    Awaiting Secure Tunnel Initialization...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ANOMALY -->
             <div id="anomaly" class="page">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
-                    <div class="card"
-                        style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
-                        <h4 style="margin-bottom:1rem;">Risk Score</h4>
-                        <div id="riskVal" style="font-size:4rem; font-weight:900; color:var(--primary);">39</div>
-                        <label style="color:var(--muted); font-size:0.7rem; font-weight:800;">ANOMALY RISK LEVEL</label>
+                <div style="display:grid; grid-template-columns: 1fr 2fr; gap:1.5rem; margin-bottom:1.5rem;">
+                    <div class="card" style="text-align:center; padding:3rem;">
+                        <label>Threat Risk Index</label>
+                        <div id="riskVal" style="font-size:6rem; font-weight:900; color:var(--primary);">0</div>
+                        <p style="color:var(--muted); font-size:0.8rem; letter-spacing:2px;">MONITORING BEHAVIOR VECTORS
+                        </p>
                     </div>
-                    <div class="card">
-                        <h4>Active Alerts</h4>
-                        <div id="alertBox" style="margin-top:1.5rem;"></div>
+                    <div class="card" style="padding-bottom:1rem;">
+                        <h4 style="margin-bottom:1rem;">Real-time Anomaly Matrix</h4>
+                        <div style="display:flex; gap:2rem; align-items:center;">
+                            <div style="width:240px; height:240px; position:relative;">
+                                <canvas id="chartAnomalyRadar"></canvas>
+                            </div>
+                            <div id="alertBox" style="flex:1; max-height:240px; overflow-y:auto; padding-right:10px;">
+                                <div style="color:var(--muted); font-size:0.85rem; text-align:center; padding:2rem;">
+                                    <i class="fa-solid fa-satellite-dish fa-fade"
+                                        style="font-size:2rem; margin-bottom:1rem; display:block;"></i>
+                                    SCANNING ENTROPY VECTORS...
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card">
-                    <h4>Search Frequency Timeline</h4>
-                    <div style="height:250px; margin-top:1rem;"><canvas id="chartAnomaly"></canvas></div>
-                </div>
-                <div class="card">
-                    <h4>User Activity Tracking</h4>
-                    <table style="margin-top:1rem;">
-                        <thead>
-                            <tr>
-                                <th>Identity</th>
-                                <th>Searches</th>
-                                <th>Risk Score</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="actBody"></tbody>
-                    </table>
+                    <h4>Search Intensity Timeline</h4>
+                    <div style="height:300px;"><canvas id="chartAnomaly"></canvas></div>
                 </div>
             </div>
 
-            <!-- tampe(CHAIN) -->
-            <div id="chain" class="page">
+            <div id="tamper" class="page">
                 <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <h4>Immutable Blockchain Ledger</h4>
-                        <p style="color:var(--muted); font-size:0.85rem;">Cryptographically chained search logs.</p>
+                        <h3>Immutable Hash Chain</h3>
+                        <p style="color:var(--muted);">Decentralized logging provides non-repudiation for every platform
+                            action.</p>
                     </div>
-                    <button onclick="verifyChain()" class="btn btn-glow" style="width:200px;">VERIFY CHAIN</button>
+                    <button onclick="verifyChain()" class="btn-glow">VERIFY DATABASE INTEGRITY</button>
                 </div>
-                <div id="chainBox"></div>
-                <div class="card" style="padding:0;">
+                <div id="chainTimeline"></div>
+            </div>
+
+            <div id="audit" class="page">
+                <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th>Block #</th>
-                                <th>Timestamp</th>
-                                <th>User</th>
-                                <th>Action</th>
-                                <th>Hash Proof</th>
-                            </tr>
-                        </thead>
-                        <tbody id="chainBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- AUDIT -->
-            <div id="audit" class="page">
-                <div class="card">
-                    <h4>System Audit Logs</h4>
-                    <table style="margin-top:1rem;">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>User</th>
-                                <th>Action</th>
-                                <th>Details</th>
+                                <th>UTC Timestamp</th>
+                                <th>Operator</th>
+                                <th>Action Performed</th>
+                                <th>Cryptographic Proof</th>
                             </tr>
                         </thead>
                         <tbody id="auditBody"></tbody>
@@ -573,122 +539,132 @@
                 </div>
             </div>
 
-            <!-- PERF -->
             <div id="perf" class="page">
-                <div class="card" style="background:rgba(59,130,246,0.05);">
-                    <h4>Encryption & Retrieval Scorecard</h4>
+                <div class="card">
+                    <h4>Throughput Benchmarking (10k Identities)</h4>
                     <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1.5rem; margin-top:2rem;">
-                        <div class="stat-card" style="text-align:center;">
-                            <label>Encryption Speed</label>
-                            <div class="val" id="pEnc" style="color:var(--primary);">0.000ms</div>
-                            <small style="color:var(--muted);">Per Record (AES-256)</small>
+                        <div class="stat-card" style="text-align:center;"><label>Enc Latency</label>
+                            <div class="val" id="pEnc">0ms</div>
                         </div>
-                        <div class="stat-card" style="text-align:center;">
-                            <label>Token Speed</label>
-                            <div class="val" id="pTok" style="color:var(--primary);">0.000ms</div>
-                            <small style="color:var(--muted);">HMAC-SHA256</small>
+                        <div class="stat-card" style="text-align:center;"><label>Token Latency</label>
+                            <div class="val" id="pTok">0ms</div>
                         </div>
-                        <div class="stat-card" style="text-align:center;">
-                            <label>Throughput</label>
-                            <div class="val" id="pThr" style="color:var(--accent);">21,739</div>
-                            <small style="color:var(--muted);">Record/Sec</small>
+                        <div class="stat-card" style="text-align:center;"><label>I/O Ops/Sec</label>
+                            <div class="val" id="pThr">0</div>
                         </div>
                     </div>
                 </div>
                 <div class="card">
-                    <h4>Benchmark Metrics</h4>
-                    <div style="height:300px; margin-top:1.5rem;"><canvas id="chartPerf"></canvas></div>
+                    <h4>Processing Latency Graph</h4>
+                    <div style="height:350px;"><canvas id="chartPerf"></canvas></div>
                 </div>
             </div>
 
-            <!-- BREACH -->
             <div id="breach" class="page">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                    <h3 style="color:var(--danger);">[!] EMERGENCY: RAW DATABASE DUMP</h3>
-                    <button onclick="go('home', this)" class="btn"
-                        style="background:#22c55e; color:#fff; padding:6px 15px; font-size:0.7rem;">RESTORE
-                        PROTECTION</button>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                    <div>
+                        <h3>Cybersecurity Breach Simulator</h3>
+                        <p style="color:var(--muted);">Simulate raw access to the storage layer without application
+                            keys.</p>
+                    </div>
+                    <button onclick="loadBreach()" class="btn-glow" style="background:var(--danger);"><i
+                            class="fa-solid fa-skull-crossbones"></i> INITIATE BREACH</button>
                 </div>
                 <div class="terminal" id="termBody">
-                    <p style="color:#f00; font-weight:800; margin-bottom:1rem;">[!!] DETECT DATABASE FILE ACCESS.
-                        DUMPING ENCRYPTED BLOB... [!!]</p>
+                    <p style="color:#0f0;">[SESSION READY] WAITING FOR BREACH EVENT...</p>
                 </div>
-                <div style="margin-top:1rem; border-top:1px solid #333; padding-top:1rem;">
-                    <h4 style="color:#22c55e;">[RESULT] ZERO PLAINTEXT FOUND.</h4>
-                    <p style="font-size:0.8rem; color:#888;">The attacker gained nothing. The entire customer data is a
-                        stream of AES-256 ciphertexts. System Intact.</p>
+                <div style="margin-top:2rem; background:rgba(34,197,94,0.1); padding:1.5rem; border-radius:16px; border:1px solid var(--accent); display:none;"
+                    id="breachResult">
+                    <h3 style="color:var(--accent); margin-bottom:0.5rem;"><i class="fa-solid fa-shield-check"></i>
+                        BREACH MITIGATED: ZERO PLAINTEXT DATA DISCOVERED</h3>
+                    <p style="font-size:0.9rem;">The simulation confirms that while the attacker gained raw DB access,
+                        the absence of KMS keys rendered all PII strictly unreadable.</p>
                 </div>
             </div>
-
-        </div>
-    </div>
-
-    <!-- CSV PROGRESS TOOLTIP -->
-    <div id="csvProgress"
-        style="position:fixed; bottom:20px; right:20px; width:300px; background:var(--card); border:1px solid var(--border); padding:1rem; border-radius:16px; display:none;">
-        <div style="display:flex; justify-content:space-between; font-size:0.8rem;"><span>Ingesting Encrypted
-                Data...</span><span id="pNum">0%</span></div>
-        <div style="height:8px; background:var(--bg); border-radius:4px; overflow:hidden; margin-top:10px;">
-            <div id="pFill" style="height:100%; background:var(--primary); width:0%; transition:0.3s;"></div>
         </div>
     </div>
 
     <script>
         const API = "http://127.0.0.1:8000";
         let TK = localStorage.getItem('hal4_tk');
-        let ROLE = localStorage.getItem('hal4_role') || "CLERK";
+        let chartH, chartA, chartP, chartR;
 
-        const AES_HEX = "a0f1f1574cdca14f8822063eff630361aec5beec3b3c6c6bf7f29214683b33c7";
-        const HMAC_HEX = "78e670e84ac5a9d52b8662aa74dbec8db961d38f71c18da76b720c5faf05b43e";
-        const AES_KEY = CryptoJS.enc.Hex.parse(AES_HEX);
-        const HMAC_KEY = CryptoJS.enc.Hex.parse(HMAC_HEX);
+        const KMS = {
+            HMAC_KEY: CryptoJS.enc.Hex.parse("78e670e84ac5a9d52b8662aa74dbec8db961d38f71c18da76b720c5faf05b43e"),
+            AES_KEY: CryptoJS.enc.Hex.parse("a0f1f1574cdca14f8822063eff630361aec5beec3b3c6c6bf7f29214683b33c7")
+        };
 
-        function decrypt(b64) {
+        function dec(b64) {
             try {
+                if (!b64) return "";
                 const raw = CryptoJS.enc.Base64.parse(b64);
                 const iv = CryptoJS.lib.WordArray.create(raw.words.slice(0, 4), 16);
                 const ct = CryptoJS.lib.WordArray.create(raw.words.slice(4), raw.sigBytes - 16);
-                const dec = CryptoJS.AES.decrypt({ ciphertext: ct }, AES_KEY, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
-                return dec.toString(CryptoJS.enc.Utf8);
+                const decrypted = CryptoJS.AES.decrypt({ ciphertext: ct }, KMS.AES_KEY, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+                return decrypted.toString(CryptoJS.enc.Utf8);
             } catch (e) { return "[ENCRYPTED]"; }
         }
 
-        function mask(s) {
-            if (!s) return "";
-            if (ROLE === "Admin") return s;
-            if (ROLE === "Manager") return s[0] + "**** " + s.split(' ').slice(1).join(' ');
-            return s[0] + "********";
-        }
+        function mask(s) { if (!s || s === "[HIDDEN]" || s === "[ENCRYPTED]") return s; return s.substring(0, 4) + "••••••••"; }
 
-        function doLogin(e) {
-            e.preventDefault();
-            const fd = new FormData();
-            fd.append('username', document.getElementById('userIn').value);
-            fd.append('password', document.getElementById('passIn').value);
-            fetch(`${API}/login`, { method: 'POST', body: fd }).then(r => r.json()).then(d => {
-                if (d.access_token) {
-                    localStorage.setItem('hal4_tk', d.access_token);
-                    localStorage.setItem('hal4_role', d.role);
-                    localStorage.setItem('hal4_user', document.getElementById('userIn').value);
-                    location.reload();
-                } else alert("Auth Failed");
+        function doSearch(val) {
+            if (val.length < 3) { document.getElementById('tokenViz').style.display = 'none'; return; }
+            const viz = document.getElementById('tokenViz');
+            viz.style.display = 'block';
+            viz.innerHTML = `<span style="color:var(--primary);">[KMS]</span> Initializing Blind Search Tunnel...<br>`;
+
+            const tok = CryptoJS.HmacSHA256(val.toLowerCase().trim(), KMS.HMAC_KEY).toString();
+            viz.innerHTML += `<span style="color:var(--primary);">[TOKEN]</span> GEN_HASH: ${tok.substring(0, 32)}...<span class="cursor-blink"></span><br>`;
+            viz.innerHTML += `<span style="color:var(--primary);">[BLIND]</span> Scanning 10,000 Identity Vectors...`;
+
+            fetch(`${API}/secure-search?query=${val}`, { method: 'POST', headers: hdr() }).then(r => {
+                if (r.status === 403) {
+                    document.getElementById('lockdown').style.display = 'flex';
+                    document.getElementById('badUser').innerText = localStorage.getItem('hal4_user') || 'ANON';
+                    // Add a glitch effect sound or animation if we wanted, but let's keep it clean
+                }
+                return r.json();
+            }).then(d => {
+                document.getElementById('resBody').innerHTML = d.results.map(r => {
+                    const rClass = r.risk_score.toLowerCase();
+                    return `
+                    <tr>
+                        <td style="font-family:JetBrains Mono; color:var(--primary);">#${r.id}</td>
+                        <td>
+                            <div style="font-weight:800; font-size:1rem;">${r.full_name}</div>
+                            <div style="font-size:0.75rem; color:var(--muted); font-family:JetBrains Mono;">${r.customer_id}</div>
+                        </td>
+                        <td>
+                            <div style="font-family:JetBrains Mono; color:var(--text); font-weight:600;">ACC: ${r.account_number}</div>
+                            <div style="font-size:0.75rem; color:var(--muted); margin-top:4px;">
+                                <span style="background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">IFSC: ${r.ifsc}</span>
+                                <span style="background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px; margin-left:5px;">PH: ${r.phone_number}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight:600;">${r.city}</div>
+                            <div style="font-size:0.75rem; color:var(--muted);">${r.branch}</div>
+                        </td>
+                        <td><span class="badge risk-${rClass}">${r.risk_score}</span></td>
+                        <td><span class="badge" style="background:rgba(59,130,246,0.12); color:var(--primary); border:1px solid rgba(59,130,246,0.2);">${r.match_type} MATCH</span></td>
+                    </tr>
+                    `;
+                }).join('');
+                if (d.results.length === 0) document.getElementById('resBody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:4rem; color:var(--muted);">No matches found in encrypted partition.</td></tr>';
+                viz.innerHTML += `<br><span style="color:var(--accent);">[DONE]</span> SECURE MATCHES FOUND: ${d.count} | LATENCY: ${d.time_ms}ms`;
             });
         }
-        function logout() { localStorage.clear(); location.reload(); }
-        function hdr() { return { 'Authorization': `Bearer ${TK}` }; }
 
-        function go(id, el) {
+        function go(page, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            document.getElementById(page).classList.add('active');
             if (el) el.classList.add('active');
-            const pt = { home: 'Dashboard', search: 'Secure Search', anomaly: 'Anomaly Detection', chain: 'Tamper Detection', audit: 'Audit Logs', perf: 'System Performance', breach: 'Breach Simulation' };
-            document.getElementById('pgTitle').innerText = pt[id] || 'Security Center';
-            if (id === 'chain') loadChain();
-            if (id === 'anomaly') loadAnomaly();
-            if (id === 'audit') loadAudit();
-            if (id === 'perf') loadPerf();
-            if (id === 'breach') runBreach();
+            document.getElementById('pgTitle').innerText = page.charAt(0).toUpperCase() + page.slice(1);
+            if (page === 'anomaly') loadAnomaly();
+            if (page === 'perf') loadPerf();
+            if (page === 'tamper') loadChain();
+            if (page === 'audit') loadAudit();
         }
 
         function loadStats() {
@@ -696,148 +672,243 @@
                 document.getElementById('sRec').innerText = (d.total_records || 0).toLocaleString();
                 document.getElementById('sTok').innerText = (d.total_tokens || 0).toLocaleString();
                 document.getElementById('sBlk').innerText = (d.total_blocks || 0).toLocaleString();
-                document.getElementById('sAud').innerText = (d.total_blocks || 0).toLocaleString();
+                document.getElementById('sAud').innerText = (d.total_logs || 0).toLocaleString();
             });
-        }
-
-        function search(val) {
-            if (val.length < 3) return;
-            const viz = document.getElementById('tokenViz');
-            viz.style.display = 'block';
-            const tok = CryptoJS.HmacSHA256(val.toLowerCase().trim(), HMAC_KEY).toString();
-            viz.innerHTML = `[SECURE_PROTOCOL] Generation Blind Token...\n> Query: "${val}"\n> Token: ${tok.substring(0, 32)}...\n> Match: Ciphertext Blind Search...`;
-
-            fetch(`${API}/secure-search?query=${val}`, { method: 'POST', headers: hdr() })
-                .then(r => { if (r.status === 403) document.getElementById('lockdown').style.display = 'flex'; return r.json(); })
-                .then(d => {
-                    document.getElementById('resBody').innerHTML = d.results.map(r => `<tr>
-                        <td style="font-family:JetBrains Mono; color:var(--primary);">#${r.id}</td>
-                        <td style="font-weight:700;">${mask(decrypt(r.customer_name))}</td>
-                        <td>${mask(decrypt(r.account))}</td>
-                        <td>${decrypt(r.city)}</td>
-                        <td><span class="badge badge-secure">AES-256 MATCH</span></td>
-                    </tr>`).join('');
-                });
         }
 
         function loadAnomaly() {
             fetch(`${API}/anomaly-report`, { headers: hdr() }).then(r => r.json()).then(d => {
-                document.getElementById('riskVal').innerText = Math.round(d.users[0]?.score || 0);
-                document.getElementById('riskVal').style.color = d.users[0]?.score > 70 ? 'var(--danger)' : 'var(--primary)';
-                document.getElementById('alertBox').innerHTML = d.alerts.map(a => `<div style="padding:10px; border-left:4px solid var(--danger); background:rgba(239,68,68,0.05); margin-bottom:10px; font-size:0.8rem;">${a}</div>`).join('');
-                document.getElementById('actBody').innerHTML = d.users.map(u => `<tr><td>${u.user}</td><td>${u.searches}</td><td>${u.score}%</td><td><span class="badge" style="background:${u.score > 50 ? 'var(--danger)' : 'var(--accent)'}">${u.score > 50 ? 'ELEVATED' : 'NORMAL'}</span></td></tr>`).join('');
-                renderAnomalyChart(d.timeline);
+                const mainScore = Math.round(d.users[0]?.score || 0);
+                document.getElementById('riskVal').innerText = mainScore;
+
+                if (d.alerts.length > 0) {
+                    document.getElementById('alertBox').innerHTML = d.alerts.map(a => `<div style="background:rgba(239,68,68,0.1); border:1px solid var(--danger); padding:1rem; border-radius:12px; margin-bottom:0.8rem; font-size:0.8rem; border-left:4px solid var(--danger); animation:pulse 2s infinite;">${a}</div>`).join('');
+                } else if (mainScore > 0) {
+                    document.getElementById('alertBox').innerHTML = `<div style="background:rgba(59,130,246,0.1); border:1px solid var(--primary); padding:1rem; border-radius:12px; margin-bottom:0.8rem; font-size:0.8rem; border-left:4px solid var(--primary);">SYSTEM_STABLE: Monitoring search intensity (${mainScore}%)</div>`;
+                }
+
+                // Update Radar Graph for Behavioral Vectors
+                // We'll map the risk score to different vectors for visualization
+                chartR.data.datasets[0].data = [
+                    mainScore,
+                    Math.min(100, mainScore * 0.8 + 10),
+                    Math.min(100, mainScore * 0.5 + 5),
+                    Math.min(100, mainScore * 0.3),
+                    Math.min(100, mainScore * 1.2)
+                ];
+                chartR.update();
+
+                // Update Timeline Graph
+                chartA.data.labels = d.timeline.map(t => t.label);
+                chartA.data.datasets[0].data = d.timeline.map(t => t.count);
+                chartA.update();
             });
         }
 
         function loadPerf() {
             fetch(`${API}/performance-metrics`, { headers: hdr() }).then(r => r.json()).then(d => {
-                document.getElementById('pEnc').innerText = (d.enc_speed_ms || 0) + "ms";
-                document.getElementById('pTok').innerText = (d.tok_speed_ms || 0) + "ms";
-                document.getElementById('pThr').innerText = (d.throughput || 0).toLocaleString();
-                renderPerfChart(d);
+                document.getElementById('pEnc').innerText = d.enc_speed_ms + "ms";
+                document.getElementById('pTok').innerText = d.tok_speed_ms + "ms";
+                document.getElementById('pThr').innerText = d.throughput + "k/s";
+
+                chartP.data.labels = d.history.map(h => h.time);
+                chartP.data.datasets[0].data = d.history.map(h => h.enc);
+                chartP.data.datasets[1].data = d.history.map(h => h.tok);
+                chartP.update();
             });
         }
 
         function loadChain() {
             fetch(`${API}/blockchain-chain`, { headers: hdr() }).then(r => r.json()).then(d => {
-                document.getElementById('chainBody').innerHTML = d.map(b => `<tr>
-                    <td style="font-weight:800; color:var(--primary);">#${b.id}</td>
-                    <td style="font-size:0.75rem; opacity:0.6;">${b.time.split('T')[1].split('.')[0]}</td>
-                    <td>${b.user}</td>
-                    <td><span class="badge" style="background:rgba(255,255,255,0.05);">${b.action}</span></td>
-                    <td style="font-family:JetBrains Mono; color:var(--accent); font-size:0.65rem;">${b.hash.substring(0, 32)}...</td>
-                </tr>`).join('');
+                document.getElementById('chainTimeline').innerHTML = d.map(b => `
+                    <div class="card" style="margin-bottom:0.8rem; border-left:4px solid var(--accent); padding:1.2rem;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b style="color:var(--accent);">BLOCK #${b.id}</b> <span style="font-size:0.75rem; color:var(--muted);">${b.time}</span></div>
+                        <div style="font-size:0.8rem; margin-bottom:5px;">${b.action} :: Operator: ${b.user}</div>
+                        <div style="font-family:JetBrains Mono; font-size:0.65rem; color:var(--muted); word-break:break-all;">${b.hash}</div>
+                    </div>
+                `).join('');
             });
         }
 
         function loadAudit() {
-            fetch(`${API}/blockchain-chain`, { headers: hdr() }).then(r => r.json()).then(d => {
-                document.getElementById('auditBody').innerHTML = d.reverse().map(b => `<tr>
-                    <td style="font-size:0.8rem; color:var(--muted);">${b.time}</td>
-                    <td><b>${b.user}</b></td>
-                    <td><span class="badge" style="background:var(--primary); color:#fff; font-size:0.6rem;">${b.action}</span></td>
-                    <td style="font-size:0.8rem;">${b.details || 'System operation processed.'}</td>
-                </tr>`).join('');
+            fetch(`${API}/audit-logs`, { headers: hdr() }).then(r => r.json()).then(d => {
+                document.getElementById('auditBody').innerHTML = d.map(l => `
+                    <tr>
+                        <td style="font-family:JetBrains Mono; font-size:0.75rem;">${l.time}</td>
+                        <td style="font-weight:700; color:var(--primary);">${l.user.toUpperCase()}</td>
+                        <td>${l.action}</td>
+                        <td style="font-family:JetBrains Mono; font-size:0.65rem; color:var(--muted);">${l.hash}</td>
+                    </tr>
+                `).join('');
             });
         }
 
-        function runBreach() {
-            const body = document.getElementById('termBody');
-            body.innerHTML = '<p style="color:#f00; font-weight:800; margin-bottom:1rem;">[!!] DETECTING DATABASE FILE ACCESS... DUMPING CIPHERTEXT BLOCKS... [!!]</p>';
-            fetch(`${API}/stats`, { headers: hdr() }).then(r => r.json()).then(d => {
-                for (let i = 0; i < 15; i++) {
-                    const row = document.createElement('div');
-                    row.className = 'term-row';
-                    row.innerHTML = `<span style="color:#0f0;">ROW_${i + 1} | USER: ${Math.random().toString(36).substring(7)} | ACC: ${btoa(Math.random()).substring(0, 20)}... | CITY: ${btoa(Math.random()).substring(0, 15)}...</span>`;
-                    body.appendChild(row);
+        function loadBreach() {
+            const term = document.getElementById('termBody');
+            term.innerHTML = `<p style="color:var(--danger); font-weight:800;">[CRITICAL] DATABASE BREACH DETECTED. UNAUTHORIZED READ ACCESS GRANTED.</p>`;
+            fetch(`${API}/breach-simulation`).then(r => r.json()).then(d => {
+                let i = 0;
+                const interval = setInterval(() => {
+                    if (i >= d.dump.length) {
+                        clearInterval(interval);
+                        document.getElementById('breachResult').style.display = 'block';
+                        return;
+                    }
+                    const row = document.createElement('p');
+                    row.innerHTML = `<span style="color:#0f0;">0x${i.toString(16).toUpperCase()}</span> | RAW_PAYLOAD: <span style="color:#fff;">${d.dump[i].bin_payload}</span>`;
+                    term.appendChild(row);
+                    term.scrollTop = term.scrollHeight;
+                    i++;
+                }, 200);
+            });
+        }
+
+        function verifyChain() {
+            fetch(`${API}/tamper-check`, { headers: hdr() }).then(r => r.json()).then(d => {
+                if (d.status === 'VERIFIED') alert("Database Integrity Verified. All blocks are cryptographically valid.");
+                else alert("ALARM! Block #" + d.block_id + " has been tampered with!");
+            });
+        }
+
+        function initCharts() {
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+
+            const cHome = document.getElementById('chartHome').getContext('2d');
+            const gradBlue = cHome.createLinearGradient(0, 0, 0, 400);
+            gradBlue.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+            gradBlue.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+            chartH = new Chart(cHome, {
+                type: 'line',
+                data: {
+                    labels: ['T-10m', 'T-8m', 'T-6m', 'T-4m', 'T-2m', 'LIVE'],
+                    datasets: [{
+                        label: 'Secure Queries',
+                        data: [65, 82, 45, 110, 88, 142],
+                        borderColor: '#3b82f6',
+                        backgroundColor: gradBlue,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } },
+                        x: { grid: { display: false } }
+                    }
                 }
             });
-        }
 
-        function updateCase() {
-            const m = document.getElementById('caseMode').value;
-            const sub = document.getElementById('pgSub');
-            if (m === 'fraud') sub.innerText = "Operation: FINANCIAL_FRAUD_DETECTION_ENGINE";
-            else if (m === 'kyc') sub.innerText = "Operation: KYC_IDENTITY_VERIFICATION_PORTAL";
-            else sub.innerText = "Operation: DUPLICATE_IDENTITY_CLEANSING";
-        }
+            const cAnom = document.getElementById('chartAnomaly').getContext('2d');
+            const gradBar = cAnom.createLinearGradient(0, 0, 0, 300);
+            gradBar.addColorStop(0, '#3b82f6');
+            gradBar.addColorStop(1, '#1d4ed8');
 
-        function uploadCSV(input) {
-            if (!input.files[0]) return;
-            const prog = document.getElementById('csvProgress');
-            prog.style.display = 'block';
-            let pct = 0;
-            const itv = setInterval(() => { pct += Math.random() * 5; if (pct > 95) clearInterval(itv); document.getElementById('pFill').style.width = pct + '%'; document.getElementById('pNum').innerText = Math.round(pct) + '%'; }, 300);
-            const fd = new FormData(); fd.append('file', input.files[0]);
-            fetch(`${API}/upload-csv`, { method: 'POST', headers: hdr(), body: fd }).then(r => r.json()).then(d => {
-                clearInterval(itv); document.getElementById('pFill').style.width = '100%'; document.getElementById('pNum').innerText = '100%';
-                setTimeout(() => { prog.style.display = 'none'; loadStats(); alert("Bulk Ingest Complete."); }, 800);
+            chartA = new Chart(cAnom, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Search Intensity', data: [], backgroundColor: gradBar, borderRadius: 8 }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
             });
-        }
 
-        function simulateAttack() {
-            if (!confirm("Initiate Insider Attack Simulation? This bypasses standard protocols.")) return;
-            alert("ALERT: Local privilege escalation detected. Attempting direct DB query...");
-            setTimeout(() => { document.getElementById('lockdown').style.display = 'flex'; }, 800);
-        }
+            const cRadar = document.getElementById('chartAnomalyRadar').getContext('2d');
+            chartR = new Chart(cRadar, {
+                type: 'radar',
+                data: {
+                    labels: ['Intensity', 'Entropy', 'Frequency', 'Pattern', 'Risk'],
+                    datasets: [{
+                        label: 'Behavioral Vectors',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: '#3b82f6',
+                        pointBackgroundColor: '#3b82f6',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255,255,255,0.1)' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            pointLabels: { color: '#94a3b8', font: { size: 10 } },
+                            ticks: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
 
-        // CHARTS
-        let hChart, aChart, pChart;
-        function initHomeChart() {
-            const ctx = document.getElementById('chartFreqHome').getContext('2d');
-            hChart = new Chart(ctx, {
+            const cPerf = document.getElementById('chartPerf').getContext('2d');
+            chartP = new Chart(cPerf, {
                 type: 'line',
-                data: { labels: ['-10m', '-8m', '-6m', '-4m', '-2m', 'NOW'], datasets: [{ label: 'Search Queries', data: [5, 4, 7, 3, 8, 12], borderColor: '#3b82f6', fill: true, backgroundColor: 'rgba(59,130,246,0.1)', tension: 0.4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#1e293b' } }, x: { grid: { display: false } } } }
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: 'Encryption (ms)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true, borderWidth: 2 },
+                        { label: 'Token Gen (ms)', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.4, fill: true, borderWidth: 2 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', align: 'end', labels: { boxWidth: 12, usePointStyle: true, pointStyle: 'circle' } }
+                    },
+                    scales: {
+                        y: { beginAtZero: false, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Initial load for active charts
+            loadAnomaly();
+            loadPerf();
+        }
+
+        function doLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('userIn').value;
+            const pass = document.getElementById('passIn').value;
+            const fd = new FormData(); fd.append('username', user); fd.append('password', pass);
+            fetch(`${API}/login`, { method: 'POST', body: fd }).then(r => r.json()).then(d => {
+                if (d.access_token) {
+                    localStorage.setItem('hal4_tk', d.access_token);
+                    localStorage.setItem('hal4_user', user);
+                    location.reload();
+                } else { alert("Access Denied."); }
             });
         }
 
-        function renderAnomalyChart(timeline) {
-            const ctx = document.getElementById('chartAnomaly').getContext('2d');
-            if (aChart) aChart.destroy();
-            aChart = new Chart(ctx, {
-                type: 'bar',
-                data: { labels: timeline.map(t => t.label), datasets: [{ label: 'Frequency', data: timeline.map(t => t.count), backgroundColor: '#ef4444' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#1e293b' } } } }
-            });
-        }
-
-        function renderPerfChart(d) {
-            const ctx = document.getElementById('chartPerf').getContext('2d');
-            if (pChart) pChart.destroy();
-            pChart = new Chart(ctx, {
-                type: 'bar',
-                data: { labels: ['AES-256 Encrypt', 'HMAC-SHA256 Token', 'Full Pipeline'], datasets: [{ data: [d.enc_speed_ms, d.tok_speed_ms, d.enc_speed_ms + d.tok_speed_ms], backgroundColor: ['#3b82f6', '#22c55e', '#f59e0b'] }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#1e293b' } } } }
-            });
-        }
+        function logout() { localStorage.clear(); location.reload(); }
+        function hdr() { return { 'Authorization': `Bearer ${localStorage.getItem('hal4_tk')}` }; }
 
         if (TK) {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('dashboard').style.display = 'flex';
-            document.getElementById('uName').innerText = (localStorage.getItem('hal4_user') || 'ADMIN_001').toUpperCase();
-            loadStats(); initHomeChart();
+            initCharts();
+            loadStats();
+            setInterval(loadStats, 5000);
+            setInterval(() => { if (document.getElementById('anomaly').classList.contains('active')) loadAnomaly(); }, 3000);
+            setInterval(() => { if (document.getElementById('perf').classList.contains('active')) loadPerf(); }, 3000);
         }
     </script>
 </body>

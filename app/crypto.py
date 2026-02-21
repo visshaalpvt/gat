@@ -1,91 +1,94 @@
-import os
-import base64
 import hashlib
-from Crypto.Cipher import AES
-from Crypto.Hash import HMAC, SHA256
+import hmac
+import base64
+import os
+from datetime import datetime
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding
 
-# ===== FIXED KEYS (Simple & Matching JS Exactly) =====
-# These are derived deterministically so both Python and JS produce identical output.
-MASTER_SECRET = "enterprise-bank-master-key-2026"
-AES_KEY = hashlib.sha256(b"aes-key-enterprise-2026").digest()  # 32 bytes for AES-256
-HMAC_KEY = hashlib.sha256(b"hmac-key-enterprise-2026").digest()  # 32 bytes for HMAC
-
+# ENTERPRISE KEY MANAGEMENT SYSTEM (KMS)
+# In PRD these would be in environment variables or HashiCorp Vault
+KMS_KEYS = {
+    "STORAGE_ENCRYPTION_KEY": b"a0f1f1574cdca14f8822063eff630361", # 32 bytes AES-256
+    "SEARCH_TOKEN_KEY": b"78e670e84ac5a9d52b8662aa74dbec8d",      # 32 bytes HMAC
+    "AUDIT_INTEGRITY_KEY": b"9d52b8662aa74dbec8db961d38f71c18"     # 32 bytes Blockchain
+}
 
 def encrypt(plaintext: str) -> str:
-    """AES-256-CBC Encryption with IV prepended"""
+    """AES-256-CBC Encryption with Padding"""
+    if plaintext is None: return None
+    key = KMS_KEYS["STORAGE_ENCRYPTION_KEY"]
     iv = os.urandom(16)
-    cipher = AES.new(AES_KEY, AES.MODE_CBC, iv)
-    # PKCS7 padding
-    padding_len = 16 - (len(plaintext.encode('utf-8')) % 16)
-    padded = plaintext.encode('utf-8') + bytes([padding_len] * padding_len)
-    ciphertext = cipher.encrypt(padded)
-    # Return: base64(iv + ciphertext)
+    padder = padding.PKCS7(128).padder()
+    padded_data = padder.update(plaintext.encode()) + padder.finalize()
+    
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(padded_data) + encryptor.finalize()
     return base64.b64encode(iv + ciphertext).decode('utf-8')
 
-
 def decrypt_server(ciphertext_b64: str) -> str:
-    """Server-side decryption (for verification only)"""
-    raw = base64.b64decode(ciphertext_b64)
-    iv = raw[:16]
-    ct = raw[16:]
-    cipher = AES.new(AES_KEY, AES.MODE_CBC, iv)
-    padded = cipher.decrypt(ct)
-    pad_len = padded[-1]
-    return padded[:-pad_len].decode('utf-8')
-
-
-def phonetic_encode(name: str) -> str:
-    """Manual Soundex implementation for phonetic matching"""
-    if not name: return "Z000"
-    name = name.upper()
-    first = name[0]
-    mapping = {
-        'BFPV': '1', 'CGJKQSXZ': '2', 'DT': '3',
-        'L': '4', 'MN': '5', 'R': '6'
-    }
-    
-    codes = ""
-    for char in name[1:]:
-        for k, v in mapping.items():
-            if char in k:
-                if not codes or codes[-1] != v:
-                    codes += v
-                break
-    
-    clean = (codes.replace("0", ""))[:3]
-    return (first + clean).ljust(4, "0")
+    """AES-256-CBC Decryption"""
+    if not ciphertext_b64: return ""
+    try:
+        data = base64.b64decode(ciphertext_b64)
+        iv = data[:16]
+        ciphertext = data[16:]
+        key = KMS_KEYS["STORAGE_ENCRYPTION_KEY"]
+        
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+        decryptor = cipher.decryptor()
+        padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+        
+        unpadder = padding.PKCS7(128).unpadder()
+        plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
+        return plaintext.decode('utf-8')
+    except Exception:
+        return "[PII_PROTECTED]"
 
 def generate_search_token(text: str) -> str:
-    """HMAC-SHA256 token for blind index search"""
-    h = HMAC.new(HMAC_KEY, digestmod=SHA256)
-    h.update(text.lower().strip().encode('utf-8'))
-    return h.hexdigest()
+    """HMAC-SHA256 Blind Indexing"""
+    if not text: return ""
+    key = KMS_KEYS["SEARCH_TOKEN_KEY"]
+    return hmac.new(key, text.lower().strip().encode(), hashlib.sha256).hexdigest()
+
+def phonetic_encode(text: str) -> str:
+    """Soundex Implementation for Phonetic Identity Matching"""
+    if not text: return ""
+    text = text.upper()
+    mapping = {"BFPV": "1", "CGJKQSXZ": "2", "DT": "3", "L": "4", "MN": "5", "R": "6"}
+    
+    res = text[0]
+    for char in text[1:]:
+        for keys, val in mapping.items():
+            if char in keys:
+                if val != res[-1]:
+                    res += val
+                break
+    res = (res + "000")[:4]
+    return res
 
 def generate_prefixes(text: str):
-    """Generate search tokens for the full word, prefixes, and phonetic variants"""
-    words = text.lower().strip().split()
-    all_tokens = []
+    """Multi-dimensional Search Token Generation"""
+    if not text: return []
+    clean = str(text).lower().strip()
+    tokens = [generate_search_token(clean)] # Full exact match
     
+    # Partial prefixes for names/large fields
+    if len(clean) > 3:
+        for i in range(3, min(len(clean), 15)):
+            tokens.append(generate_search_token(clean[:i]))
+            
+    # Phonetic tokens for name variation handling
+    words = clean.split()
     for word in words:
-        if len(word) < 2: continue
-        # 1. Exact/Prefix Tokens
-        all_tokens.append(generate_search_token(word))
-        for i in range(3, len(word)):
-            all_tokens.append(generate_search_token(word[:i]))
-        
-        # 2. Phonetic token (THE WINNING FEATURE)
-        soundex = phonetic_encode(word)
-        all_tokens.append(generate_search_token("FUZZY_" + soundex))
-        
-    return list(set(all_tokens))
-
-
-def mask_data(text: str, visible_chars: int = 4) -> str:
-    if len(text) <= visible_chars:
-        return "****"
-    return "*" * (len(text) - visible_chars) + text[-visible_chars:]
-
+        if len(word) > 2:
+            soundex = phonetic_encode(word)
+            tokens.append(generate_search_token("PHONETIC_" + soundex))
+            
+    return list(set(tokens))
 
 def calculate_block_hash(prev_hash, action, timestamp, user):
-    content = f"{prev_hash}|{action}|{timestamp}|{user}"
-    return hashlib.sha256(content.encode()).hexdigest()
+    payload = f"{prev_hash}{action}{timestamp}{user}"
+    return hashlib.sha256(payload.encode()).hexdigest()
