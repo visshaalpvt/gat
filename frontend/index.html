@@ -416,7 +416,7 @@
                 <div style="text-align:right;">
                     <div id="uName"
                         style="font-weight:800; font-family:'JetBrains Mono'; font-size:1.4rem; color:var(--primary); text-transform:uppercase;">
-                        SECURE_ACCESS</div>
+                        OPERATOR</div>
                     <div
                         style="color:var(--accent); font-size:0.7rem; font-weight:800; display:flex; align-items:center; gap:8px; justify-content:flex-end; margin-top:5px;">
                         <i class="fa-solid fa-circle-check"></i> AES-256 / SHA-256 TUNNEL ACTIVE
@@ -621,14 +621,11 @@
     </div>
 
     <script>
-        // Deployment Config
-        const urlParams = new URLSearchParams(window.location.search);
-        // Priority: URL Param > Current Origin (if not local) > Local
-        const API = urlParams.get('api') || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? "http://127.0.0.1:8000" : window.location.origin.replace('vercel.app', 'onrender.com').replace('frontend', 'backend'));
+        // Bulletproof Deployment Routing
+        const CURRENT_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? "http://127.0.0.1:8000"
+            : "https://cipherproxy-backend.onrender.com";
 
-        // Manual override if needed
-        const RENDER_API = "https://cipherproxy-backend.onrender.com";
-        const CURRENT_API = API.includes('localhost') ? API : RENDER_API;
         let TK = localStorage.getItem('hal4_tk');
         let chartH, chartA, chartP, chartR;
 
@@ -764,7 +761,7 @@
         }
 
         function loadChain() {
-            fetch(`${API}/blockchain-chain`, { headers: hdr() }).then(r => r.json()).then(d => {
+            fetch(`${CURRENT_API}/blockchain-chain`, { headers: hdr() }).then(r => r.json()).then(d => {
                 document.getElementById('chainTimeline').innerHTML = d.map(b => `
                     <div class="card" style="margin-bottom:0.8rem; border-left:4px solid var(--accent); padding:1.2rem;">
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><b style="color:var(--accent);">BLOCK #${b.id}</b> <span style="font-size:0.75rem; color:var(--muted);">${b.time}</span></div>
@@ -776,7 +773,7 @@
         }
 
         function loadAudit() {
-            fetch(`${API}/audit-logs`, { headers: hdr() }).then(r => r.json()).then(d => {
+            fetch(`${CURRENT_API}/audit-logs`, { headers: hdr() }).then(r => r.json()).then(d => {
                 document.getElementById('auditBody').innerHTML = d.map(l => `
                     <tr>
                         <td style="font-family:JetBrains Mono; font-size:0.75rem;">${l.time}</td>
@@ -791,7 +788,7 @@
         function loadBreach() {
             const term = document.getElementById('termBody');
             term.innerHTML = `<p style="color:var(--danger); font-weight:800;">[CRITICAL] DATABASE BREACH DETECTED. UNAUTHORIZED READ ACCESS GRANTED.</p>`;
-            fetch(`${API}/breach-simulation`).then(r => r.json()).then(d => {
+            fetch(`${CURRENT_API}/breach-simulation`).then(r => r.json()).then(d => {
                 let i = 0;
                 const interval = setInterval(() => {
                     if (i >= d.dump.length) {
@@ -809,7 +806,7 @@
         }
 
         function verifyChain() {
-            fetch(`${API}/tamper-check`, { headers: hdr() }).then(r => r.json()).then(d => {
+            fetch(`${CURRENT_API}/tamper-check`, { headers: hdr() }).then(r => r.json()).then(d => {
                 if (d.status === 'VERIFIED') alert("Database Integrity Verified. All blocks are cryptographically valid.");
                 else alert("ALARM! Block #" + d.block_id + " has been tampered with!");
             });
@@ -967,14 +964,27 @@
         function doLogin() {
             const user = document.getElementById('userIn').value;
             const pass = document.getElementById('passIn').value;
-            const fd = new FormData(); fd.append('username', user); fd.append('password', pass);
-            fetch(`${CURRENT_API}/login`, { method: 'POST', body: fd }).then(r => r.json()).then(d => {
-                if (d.access_token) {
-                    localStorage.setItem('hal4_tk', d.access_token);
-                    localStorage.setItem('hal4_user', d.user_display || user);
-                    location.reload();
-                } else { alert(d.detail || "Access Denied."); }
-            });
+            if (!user || !pass) return alert("Please fill all fields.");
+
+            const fd = new FormData();
+            fd.append('username', user);
+            fd.append('password', pass);
+
+            fetch(`${CURRENT_API}/login`, { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.access_token) {
+                        localStorage.setItem('hal4_tk', d.access_token);
+                        localStorage.setItem('hal4_user', d.user_display || user);
+                        location.reload();
+                    } else {
+                        alert(d.detail || "Authentication Failed. Please check your credentials.");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Network Error: Could not connect to the security backend. Wait 60s for Render to wake up.");
+                });
         }
 
         function logout() { localStorage.clear(); location.reload(); }
