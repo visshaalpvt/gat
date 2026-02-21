@@ -416,7 +416,7 @@
                 <div style="text-align:right;">
                     <div id="uName"
                         style="font-weight:800; font-family:'JetBrains Mono'; font-size:1.4rem; color:var(--primary); text-transform:uppercase;">
-                        OPERATOR</div>
+                        ...</div>
                     <div
                         style="color:var(--accent); font-size:0.7rem; font-weight:800; display:flex; align-items:center; gap:8px; justify-content:flex-end; margin-top:5px;">
                         <i class="fa-solid fa-circle-check"></i> AES-256 / SHA-256 TUNNEL ACTIVE
@@ -621,11 +621,18 @@
     </div>
 
     <script>
-        // Bulletproof Deployment Routing
-        const CURRENT_API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            ? "http://127.0.0.1:8000"
-            : "https://cipherproxy-backend.onrender.com";
+        // SMART BACKEND DISCOVERY
+        const getBaseAPI = () => {
+            const host = window.location.hostname;
+            if (host === 'localhost' || host === '127.0.0.1') return "http://127.0.0.1:8000";
 
+            // Try to derive the Render URL from Vercel URL
+            // e.g., gat-beta.vercel.app -> gat.onrender.com
+            const base = host.split('.')[0].replace('-beta', '').replace('-frontend', '').replace('-ui', '');
+            return `https://${base}.onrender.com`;
+        };
+
+        const CURRENT_API = getBaseAPI();
         let TK = localStorage.getItem('hal4_tk');
         let chartH, chartA, chartP, chartR;
 
@@ -971,7 +978,10 @@
             fd.append('password', pass);
 
             fetch(`${CURRENT_API}/login`, { method: 'POST', body: fd })
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error(r.statusText);
+                    return r.json();
+                })
                 .then(d => {
                     if (d.access_token) {
                         localStorage.setItem('hal4_tk', d.access_token);
@@ -982,8 +992,8 @@
                     }
                 })
                 .catch(err => {
-                    console.error(err);
-                    alert("Network Error: Could not connect to the security backend. Wait 60s for Render to wake up.");
+                    console.error("Login Error:", err);
+                    alert(`SYSTEM_OFFLINE: Could not reach Security Backend at ${CURRENT_API}\n\n1. Ensure your Render service name is correct.\n2. Wait 60s for Render to wake up from its cold-start.\n3. Try again in a minute.`);
                 });
         }
 
