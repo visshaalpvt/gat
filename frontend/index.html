@@ -13,16 +13,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
-            --bg: #050608;
-            --card: #0f1116;
-            --text: #f8fafc;
-            --muted: #64748b;
-            --primary: #00e5ff;
-            --accent: #22c55e;
+            --bg: #0b0d11;
+            --card: #151921;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --primary: #3b82f6;
+            --accent: #10b981;
             --warning: #f59e0b;
-            --danger: #ff0055;
+            --danger: #ef4444;
             --border: #1e293b;
-            --side: #0a0c10;
+            --side: #0f172a;
         }
 
         * {
@@ -440,14 +440,11 @@
     </div>
 
     <canvas id="glitchCanvas"></canvas>
-    <div class="vignette-outer"></div>
-    <div class="vignette-center"></div>
 
     <div id="loginPage" class="login-overlay" style="display:flex;">
         <div
-            style="background: rgba(15, 17, 22, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 3rem; border-radius: 30px; width: 100%; max-width: 450px; border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.8); position: relative; z-index: 10;">
-            <div
-                style="font-size:3.5rem; color:var(--primary); margin-bottom:1rem; text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);">
+            style="background: var(--card); padding: 3rem; border-radius: 20px; width: 100%; max-width: 450px; border: 1px solid var(--border); text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); position: relative; z-index: 10;">
+            <div style="font-size:3.5rem; color:var(--primary); margin-bottom:1rem;">
                 <i class="fa-solid fa-user-shield"></i>
             </div>
             <h1 style="font-weight:900; letter-spacing:-1px; font-size:2.5rem; color: #fff;">CipherProxy</h1>
@@ -787,7 +784,7 @@
                 this.canvas = document.getElementById(canvasId);
                 if (!this.canvas) return;
                 this.ctx = this.canvas.getContext('2d');
-                this.colors = ['#2b4539', '#61dca3', '#61b3dc', '#00e5ff', '#ff0055'];
+                this.colors = ['#2b4539', '#61dca3', '#61b3dc', '#ffffff', '#3b82f6'];
                 this.glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789'.split('');
 
                 this.fontSize = 16;
@@ -1078,8 +1075,8 @@
 
             const cHome = document.getElementById('chartHome').getContext('2d');
             const gradBlue = cHome.createLinearGradient(0, 0, 0, 400);
-            gradBlue.addColorStop(0, 'rgba(0, 229, 255, 0.6)');
-            gradBlue.addColorStop(1, 'rgba(0, 229, 255, 0)');
+            gradBlue.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+            gradBlue.addColorStop(1, 'rgba(59, 130, 246, 0)');
 
             chartH = new Chart(cHome, {
                 type: 'line',
@@ -1088,16 +1085,14 @@
                     datasets: [{
                         label: 'Secure Queries',
                         data: [120, 150, 80, 200, 140, 280],
-                        borderColor: '#00e5ff',
+                        borderColor: '#3b82f6',
                         backgroundColor: gradBlue,
-                        tension: 0.5,
+                        tension: 0.4,
                         fill: true,
-                        pointRadius: 6,
-                        pointBackgroundColor: '#00e5ff',
+                        pointRadius: 4,
+                        pointBackgroundColor: '#3b82f6',
                         pointBorderColor: '#fff',
-                        borderWidth: 5,
-                        shadowBlur: 10,
-                        shadowColor: 'rgba(0, 229, 255, 0.5)'
+                        borderWidth: 3
                     }]
                 },
                 options: {
@@ -1117,8 +1112,8 @@
 
             const cAnom = document.getElementById('chartAnomaly').getContext('2d');
             const gradBar = cAnom.createLinearGradient(0, 0, 0, 300);
-            gradBar.addColorStop(0, '#ff0055');
-            gradBar.addColorStop(1, '#670022');
+            gradBar.addColorStop(0, '#3b82f6');
+            gradBar.addColorStop(1, '#1e3a8a');
 
             chartA = new Chart(cAnom, {
                 type: 'bar',
@@ -1146,9 +1141,9 @@
                     datasets: [{
                         label: 'Behavioral Vectors',
                         data: [60, 40, 80, 20, 50],
-                        backgroundColor: 'rgba(0, 229, 255, 0.2)',
-                        borderColor: '#00e5ff',
-                        pointBackgroundColor: '#ff0055',
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: '#3b82f6',
+                        pointBackgroundColor: '#ef4444',
                         pointBorderColor: '#fff',
                         pointRadius: 5,
                         borderWidth: 3,
@@ -1178,8 +1173,8 @@
                 data: {
                     labels: [],
                     datasets: [
-                        { label: 'Encryption (ms)', data: [], borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.1)', tension: 0.5, fill: true, borderWidth: 3, pointRadius: 0 },
-                        { label: 'Token Gen (ms)', data: [], borderColor: '#ff0055', backgroundColor: 'rgba(255, 0, 85, 0.1)', tension: 0.5, fill: true, borderWidth: 3, pointRadius: 0 }
+                        { label: 'Encryption (ms)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true, borderWidth: 2 },
+                        { label: 'Token Gen (ms)', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', tension: 0.4, fill: true, borderWidth: 2 }
                     ]
                 },
                 options: {
